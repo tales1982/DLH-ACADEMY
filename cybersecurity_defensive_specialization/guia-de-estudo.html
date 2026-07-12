@@ -1,0 +1,742 @@
+<title>Fundamentos da Avaliação de Postura de Segurança — MedDefense</title>
+<meta name="description" content="Material de estudo em português: fundamentos de segurança, controles, gestão de ativos e dados, avaliação de risco e comunicação profissional, com as fontes oficiais citadas no projeto." />
+<style>
+  /* ---------- Tokens ---------- */
+  :root {
+    --bg: #f1f2ef;
+    --surface: #ffffff;
+    --surface-2: #e8eae4;
+    --ink: #1b1f1c;
+    --ink-soft: #545b54;
+    --ink-faint: #7b8179;
+    --line: #d7dad2;
+    --accent: #1c6e76;
+    --accent-ink: #0f4a50;
+    --accent-soft: #dcedec;
+    --risk-critical: #a6301f;
+    --risk-high: #b96a16;
+    --risk-medium: #8c7a16;
+    --risk-low: #2c7a4b;
+    --note-bg: #f5e9a8;
+    --note-ink: #423a12;
+    --shadow: 0 1px 2px rgba(20, 24, 20, 0.06), 0 8px 24px -12px rgba(20, 24, 20, 0.18);
+
+    --font-body: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    --font-head: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Roboto Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121614;
+      --surface: #181e1b;
+      --surface-2: #1f2622;
+      --ink: #e7ebe6;
+      --ink-soft: #a9b2ab;
+      --ink-faint: #7c847d;
+      --line: #2b332e;
+      --accent: #5fc6cd;
+      --accent-ink: #9be2e6;
+      --accent-soft: #1d3a3b;
+      --risk-critical: #e2695a;
+      --risk-high: #e0a24c;
+      --risk-medium: #cbbe5c;
+      --risk-low: #6fc496;
+      --note-bg: #3a3520;
+      --note-ink: #ecdd9c;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #121614;
+    --surface: #181e1b;
+    --surface-2: #1f2622;
+    --ink: #e7ebe6;
+    --ink-soft: #a9b2ab;
+    --ink-faint: #7c847d;
+    --line: #2b332e;
+    --accent: #5fc6cd;
+    --accent-ink: #9be2e6;
+    --accent-soft: #1d3a3b;
+    --risk-critical: #e2695a;
+    --risk-high: #e0a24c;
+    --risk-medium: #cbbe5c;
+    --risk-low: #6fc496;
+    --note-bg: #3a3520;
+    --note-ink: #ecdd9c;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #f1f2ef;
+    --surface: #ffffff;
+    --surface-2: #e8eae4;
+    --ink: #1b1f1c;
+    --ink-soft: #545b54;
+    --ink-faint: #7b8179;
+    --line: #d7dad2;
+    --accent: #1c6e76;
+    --accent-ink: #0f4a50;
+    --accent-soft: #dcedec;
+    --risk-critical: #a6301f;
+    --risk-high: #b96a16;
+    --risk-medium: #8c7a16;
+    --risk-low: #2c7a4b;
+    --note-bg: #f5e9a8;
+    --note-ink: #423a12;
+  }
+
+  /* ---------- Base ---------- */
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent-ink); text-decoration-color: var(--line); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: currentColor; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-head);
+    color: var(--ink);
+    text-wrap: balance;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  p { margin: 0 0 1em; max-width: 68ch; }
+  ul, ol { margin: 0 0 1em; padding-left: 1.3em; }
+  li { margin-bottom: 0.4em; max-width: 64ch; }
+
+  code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+
+  .eyebrow {
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent-ink);
+  }
+
+  /* ---------- Skip link ---------- */
+  .skip-link {
+    position: absolute; left: -999px; top: 0;
+    background: var(--accent); color: #fff; padding: 0.6em 1em; z-index: 100;
+  }
+  .skip-link:focus { left: 1em; top: 1em; }
+
+  /* ---------- Cover ---------- */
+  .cover {
+    border-bottom: 1px solid var(--line);
+    padding: clamp(2.5rem, 4vw, 4.5rem) clamp(1.25rem, 4vw, 3rem) clamp(2.5rem, 5vw, 4rem);
+    background:
+      linear-gradient(180deg, var(--accent-soft) 0%, transparent 65%);
+  }
+  .cover-inner { max-width: 920px; margin: 0 auto; }
+  .cover .eyebrow { display: block; margin-bottom: 0.9em; }
+  .cover h1 {
+    font-size: clamp(2.1rem, 1.5rem + 2.4vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    max-width: 16ch;
+  }
+  .cover .lede {
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    margin-top: 0.9em;
+    max-width: 56ch;
+  }
+  blockquote.pull {
+    margin: 1.8em 0 0;
+    padding: 0.2em 0 0.2em 1.1em;
+    border-left: 3px solid var(--accent);
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink);
+    max-width: 58ch;
+  }
+  blockquote.pull cite {
+    display: block;
+    margin-top: 0.5em;
+    font-style: normal;
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+  }
+
+  .theme-toggle {
+    position: fixed; top: 1rem; right: 1rem; z-index: 50;
+    display: flex; align-items: center; gap: 0.4em;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0.35em 0.8em 0.35em 0.7em;
+    font-family: var(--font-head); font-size: 0.75rem; color: var(--ink-soft);
+    cursor: pointer; box-shadow: var(--shadow);
+  }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: clamp(1.5rem, 3vw, 3.5rem);
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 4vw, 3rem) 5rem;
+    align-items: start;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+  nav.toc .toc-title {
+    font-family: var(--font-head); font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint);
+    margin-bottom: 0.8em;
+  }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; }
+  nav.toc li { margin: 0; }
+  nav.toc a {
+    display: block;
+    padding: 0.32em 0 0.32em 0.75em;
+    border-left: 2px solid var(--line);
+    color: var(--ink-soft);
+    font-family: var(--font-head);
+    font-size: 0.84rem;
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  nav.toc a:hover { color: var(--ink); border-left-color: var(--ink-faint); }
+  nav.toc a.active { color: var(--accent-ink); border-left-color: var(--accent); font-weight: 700; }
+  nav.toc .toc-sub a { padding-left: 1.5em; font-size: 0.79rem; }
+  nav.toc .toc-group { margin-top: 0.9em; }
+
+  main.content { min-width: 0; }
+
+  section { padding-top: 3.2rem; margin-top: -1.5rem; scroll-margin-top: 1.2rem; }
+  section:first-child { padding-top: 0; margin-top: 0; }
+
+  .section-head { margin-bottom: 1.4rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+  .section-head .eyebrow { margin-bottom: 0.5em; display: block; }
+  .section-head h2 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.05rem); font-weight: 800; }
+  .section-head .dek { color: var(--ink-soft); font-size: 1.02rem; margin-top: 0.6em; max-width: 60ch; }
+
+  h3.pillar-title {
+    font-size: 1.25rem; font-weight: 800; margin-top: 2.4rem; margin-bottom: 0.2rem;
+    display: flex; align-items: baseline; gap: 0.5em;
+  }
+  h3.pillar-title .num {
+    font-family: var(--font-mono); color: var(--accent-ink); font-size: 0.85rem;
+  }
+  h4 { font-size: 1.02rem; font-weight: 700; margin-top: 1.4rem; margin-bottom: 0.4rem; }
+
+  /* ---------- Cards / boxes ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .example-box {
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.85em 1.1em;
+    margin: 0.9em 0 1.4em;
+    font-size: 0.96rem;
+  }
+  .example-box .label {
+    font-family: var(--font-head); font-size: 0.68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent-ink);
+    display: block; margin-bottom: 0.35em;
+  }
+  .example-box p:last-child { margin-bottom: 0; }
+
+  .callout {
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 1rem 1.3rem;
+    margin: 1.2em 0;
+    font-size: 0.96rem;
+  }
+  .callout.warn { background: color-mix(in srgb, var(--risk-high) 14%, var(--surface)); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* sticky note */
+  .sticky-note {
+    font-family: var(--font-mono);
+    background: var(--note-bg);
+    color: var(--note-ink);
+    display: inline-block;
+    padding: 0.9em 1.1em;
+    border-radius: 2px;
+    transform: rotate(-1.4deg);
+    box-shadow: var(--shadow);
+    margin: 1em 0 1.4em;
+    font-size: 0.92rem;
+  }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; margin: 1em 0 1.6em; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.9rem; background: var(--surface); }
+  caption { text-align: left; caption-side: top; font-family: var(--font-head); font-size: 0.78rem; color: var(--ink-faint); padding: 0.6em 0.9em 0; }
+  th, td { text-align: left; padding: 0.65em 0.9em; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-family: var(--font-head); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); background: var(--surface-2); }
+  tbody th { font-family: var(--font-head); font-weight: 700; font-size: 0.86rem; white-space: nowrap; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+  td .fn { color: var(--ink-soft); }
+
+  /* ---------- Data classification scale ---------- */
+  .class-scale { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin: 1em 0 1.6em; }
+  .class-tier { border-radius: 8px; padding: 0.9em 1em; border: 1px solid var(--line); background: var(--surface); border-top: 4px solid var(--tier-color); }
+  .class-tier h4 { margin: 0 0 0.3em; font-size: 0.92rem; }
+  .class-tier p { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 0.5em; }
+  .class-tier .ex { font-size: 0.8rem; font-family: var(--font-mono); color: var(--ink); }
+  @media (max-width: 720px) { .class-scale { grid-template-columns: 1fr 1fr; } }
+
+  /* ---------- Strategy cards ---------- */
+  .strategy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem; margin: 1em 0 1.6em; }
+  .strategy-card { border: 1px solid var(--line); border-radius: 8px; padding: 1em 1.1em; background: var(--surface); }
+  .strategy-card h4 { margin-top: 0; }
+  .strategy-card p { font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 0.5em; }
+  .strategy-card .ex { font-size: 0.83rem; }
+
+  /* ---------- Resource cards ---------- */
+  .resource-group { margin-bottom: 2rem; }
+  .resource-group h4 { font-family: var(--font-head); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 0.8em; }
+  .resource-card {
+    border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+    padding: 1.1rem 1.3rem; margin-bottom: 0.9rem; box-shadow: var(--shadow);
+  }
+  .resource-card .rc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
+  .resource-card h5 { font-family: var(--font-head); font-size: 1rem; font-weight: 800; margin: 0; }
+  .badge {
+    font-family: var(--font-head); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--accent-ink); background: var(--accent-soft);
+    padding: 0.22em 0.55em; border-radius: 999px; white-space: nowrap;
+  }
+  .resource-card p { font-size: 0.93rem; margin: 0.5em 0; }
+  .resource-card .focus { font-size: 0.85rem; color: var(--ink-soft); }
+  .resource-card .focus b { color: var(--ink); font-weight: 700; }
+  .resource-card a.rc-link { font-family: var(--font-head); font-size: 0.82rem; font-weight: 700; }
+
+  /* ---------- Case narrative ---------- */
+  .case { border-left: 3px solid var(--ink-faint); padding-left: 1.2em; margin: 1.2em 0; }
+  .case p { color: var(--ink); }
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.4em 0; }
+  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; background: var(--surface); }
+  .stat .num { font-family: var(--font-head); font-weight: 800; font-size: 1.7rem; color: var(--accent-ink); display: block; }
+  .stat .cap { font-size: 0.83rem; color: var(--ink-soft); }
+
+  /* ---------- Requirements ---------- */
+  .req-list { list-style: none; padding: 0; margin: 0 0 1.6em; }
+  .req-list li {
+    display: flex; gap: 0.7em; padding: 0.55em 0; border-bottom: 1px dashed var(--line);
+    max-width: none; font-size: 0.96rem;
+  }
+  .req-list li::before { content: "—"; color: var(--accent-ink); flex-shrink: 0; }
+  .req-list li:last-child { border-bottom: none; }
+
+  footer.page-footer {
+    max-width: 1180px; margin: 0 auto; padding: 2rem clamp(1.25rem, 4vw, 3rem) 3rem;
+    border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 0.82rem;
+  }
+  footer.page-footer a { color: var(--ink-faint); }
+
+  .back-to-top { display: inline-block; margin-top: 1.5rem; font-family: var(--font-head); font-size: 0.8rem; }
+
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; max-height: none; border-bottom: 1px solid var(--line); padding-bottom: 1.5rem; margin-bottom: 0.5rem; }
+  }
+</style>
+
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro/escuro">
+  <span id="themeIcon" aria-hidden="true">◐</span><span id="themeLabel">Tema</span>
+</button>
+
+<header class="cover">
+  <div class="cover-inner">
+    <span class="eyebrow">MedDefense Health Systems · Projeto 0 · Material de Estudo (PT-BR)</span>
+    <h1>Fundamentos da Avaliação de Postura de Segurança</h1>
+    <p class="lede">Antes de tocar em um firewall ou investigar um alerta, todo profissional de segurança precisa responder a uma pergunta que a maioria das equipes nunca faz de forma adequada: <strong>o que exatamente estamos protegendo?</strong></p>
+    <blockquote class="pull">
+      "Os melhores profissionais de segurança que conheço não são os que encontram mais vulnerabilidades. São os que entendem o negócio o suficiente para saber quais delas realmente importam."
+      <cite>— Wendy Nather, Head of Advisory CISOs, Cisco</cite>
+    </blockquote>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" id="toc" aria-label="Sumário">
+    <div class="toc-title">Sumário</div>
+    <ol>
+      <li><a href="#introducao">Introdução</a></li>
+      <li><a href="#importancia">Por que isso importa</a></li>
+      <li><a href="#contexto">O contexto: seu primeiro dia</a></li>
+      <li>
+        <a href="#objetivos">Objetivos de aprendizagem</a>
+        <ol class="toc-sub toc-group">
+          <li><a href="#fundamentos">1. Fundamentos de segurança</a></li>
+          <li><a href="#controles">2. Controles de segurança</a></li>
+          <li><a href="#ativos">3. Gestão de ativos e dados</a></li>
+          <li><a href="#risco">4. Avaliação de risco</a></li>
+          <li><a href="#comunicacao">5. Comunicação profissional</a></li>
+        </ol>
+      </li>
+      <li><a href="#fontes">Fontes e referências</a></li>
+      <li><a href="#requisitos">Requisitos do projeto</a></li>
+    </ol>
+  </nav>
+
+  <main class="content" id="conteudo">
+
+    <section id="introducao">
+      <div class="section-head">
+        <span class="eyebrow">Introdução</span>
+        <h2>O que exatamente estamos protegendo?</h2>
+      </div>
+      <p>Parece óbvio. Não é. A violação da Change Healthcare em fevereiro de 2024 paralisou o faturamento médico em boa parte dos Estados Unidos por semanas. Não porque os atacantes fossem excepcionalmente habilidosos — o grupo responsável usou credenciais de acesso remoto sem autenticação multifator para entrar. Mas porque ninguém tinha uma visão completa de como aquele sistema se conectava a tudo mais. Quando ele caiu, toda a cadeia de faturamento e dispensação de medicamentos do país sentiu o impacto: farmácias sem conseguir processar receitas, hospitais sem conseguir cobrar convênios. Uma empresa avaliada em bilhões de dólares foi colocada de joelhos porque o inventário de ativos era incompleto e as dependências entre sistemas não estavam documentadas.</p>
+      <p>Isso não é um caso isolado. É a norma. A maioria das organizações não consegue dizer quantos sistemas possui, onde vivem seus dados sensíveis, quais controles realmente estão em vigor ou quais lacunas existem entre o que acham que têm e o que de fato têm.</p>
+      <div class="stat-row">
+        <div class="stat"><span class="num">93%</span><span class="cap">das organizações de saúde sofreram uma violação de dados nos 3 anos anteriores ao relatório de cibersegurança do HHS de 2023.</span></div>
+        <div class="stat"><span class="num">Semanas</span><span class="cap">de interrupção no faturamento médico nos EUA após o ataque à Change Healthcare (2024) — não por falta de orçamento, mas por falta de visibilidade.</span></div>
+      </div>
+      <p>Este material não vai ensinar você a "usar ferramentas de segurança". Você não vai escanear nada nem explorar nada. Você vai fazer algo mais difícil e mais valioso: aprender a enxergar uma organização da forma como um profissional de segurança enxerga. Ler um ambiente bagunçado e produzir uma avaliação estruturada e acionável que orienta decisões reais. Olhar para a porta da sala de servidores presa aberta com uma cunha de madeira e entender exatamente o que isso significa em termos de risco.</p>
+    </section>
+
+    <section id="importancia">
+      <div class="section-head">
+        <span class="eyebrow">Por que isso importa</span>
+        <h2>A base de todo papel que você vai exercer</h2>
+      </div>
+      <p>Todo cargo de segurança que você vier a ocupar começa com essa habilidade. O analista de SOC que recebe um alerta precisa saber qual ativo foi afetado e o quão crítico ele é. O responsável por conter uma violação precisa saber quais sistemas priorizar. O pentester que encontra uma vulnerabilidade precisa entender seu impacto no negócio. O consultor de GRC que prepara uma auditoria de conformidade precisa de um inventário completo de controles e lacunas.</p>
+      <p>O relatório que você produz ao final deste projeto não é um exercício. É exatamente o documento que um consultor de segurança entrega no início de qualquer contrato. É a base sobre a qual todos os próximos projetos deste programa serão construídos — sua análise de ameaças, sua avaliação de vulnerabilidades, sua estratégia de defesa, seus planos de resposta a incidentes.</p>
+      <div class="callout"><p>Acerte aqui, e tudo que vier depois terá uma base sólida. Erre aqui, e você estará construindo sobre areia.</p></div>
+    </section>
+
+    <section id="contexto">
+      <div class="section-head">
+        <span class="eyebrow">O cenário</span>
+        <h2>Seu primeiro dia na MedDefense</h2>
+      </div>
+      <div class="case">
+        <p>Você está começando seu primeiro dia como Analista de Segurança Júnior na <strong>MedDefense Health Systems</strong>, um grupo hospitalar regional com 3 unidades — o Central (hospital de 350 leitos), a Westside Clinic (clínica ambulatorial) e a Corporate HQ (escritórios administrativos) — somando cerca de 2.000 funcionários. O departamento de TI tem 12 pessoas, sob a direção de Sarah Park.</p>
+        <p>Você se reporta a <strong>James Chen</strong>, Deputy CISO, contratado há 8 meses para construir do zero uma função de segurança que nunca existiu ali — a segurança sempre foi tratada "de lado" pela TI. James contratou seu primeiro analista, Marcus Webb, seis meses atrás. Marcus durou três meses antes de sair. Oficialmente, por uma oportunidade melhor. Extraoficialmente, James suspeita que Marcus se frustrou com o ritmo de mudança e a resistência constante da liderança a investir em segurança. A vaga ficou aberta por três meses até você ser contratado.</p>
+        <p>Na sua primeira manhã, James te leva até a sua mesa — que ainda é a mesa do Marcus, esvaziada apenas parcialmente. Um post-it no monitor diz:</p>
+        <div class="sticky-note">Check billing-srv-01, something is wrong.<br>-M</div>
+        <p>James resume a missão: <em>"Isto é tudo o que temos. Marcus começou a documentar o ambiente mas nunca terminou. O Conselho pediu uma avaliação completa da nossa postura de segurança até o fim da semana. Eles leram sobre a violação da Change Healthcare e querem saber se estamos expostos. Preciso de um documento profissional, não uma lista de problemas — uma avaliação estruturada com prioridades claras."</em></p>
+      </div>
+    </section>
+
+    <section id="objetivos">
+      <div class="section-head">
+        <span class="eyebrow">Objetivos de aprendizagem</span>
+        <h2>As cinco competências deste projeto</h2>
+        <p class="dek">Ao final, você deve conseguir explicar cada um dos pontos abaixo a qualquer pessoa, sem ajuda do Google.</p>
+      </div>
+
+      <article id="fundamentos">
+        <h3 class="pillar-title"><span class="num">01</span> Fundamentos de segurança</h3>
+
+        <h4>A Tríade CIA</h4>
+        <p>Todo controle, toda vulnerabilidade e todo incidente de segurança podem ser avaliados através de três propriedades. Quando algo dá errado, é sempre uma (ou mais) delas que foi violada.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Propriedade</th><th>O que garante</th><th>Exemplo na MedDefense</th></tr></thead>
+            <tbody>
+              <tr><th>Confidencialidade</th><td class="fn">Que a informação só seja acessível a quem tem autorização</td><td>O prontuário eletrônico deveria ser visto apenas pela equipe clínica autorizada — hoje comprometido pelo login compartilhado <code>raduser</code> na estação PACS da radiologia</td></tr>
+              <tr><th>Integridade</th><td class="fn">Que a informação não seja alterada de forma indevida ou acidental</td><td>Os dados de dosagem transmitidos às bombas de infusão BD Alaris — uma alteração indevida pode ferir ou matar um paciente</td></tr>
+              <tr><th>Disponibilidade</th><td class="fn">Que sistemas e dados estejam acessíveis quando necessário</td><td>O EHR e o sistema de chamada de enfermagem precisam estar no ar 24/7; não há plano documentado caso o Central perca energia além dos ~20 minutos de autonomia do nobreak</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Vulnerabilidade, ameaça e risco não são sinônimos</h4>
+        <p>O <a href="#fontes">NIST SP 800-30</a> define risco como uma função da probabilidade de uma fonte de ameaça explorar uma vulnerabilidade e do impacto resultante. Os três termos respondem perguntas diferentes:</p>
+        <ul>
+          <li><strong>Vulnerabilidade</strong> — uma fraqueza que pode ser explorada. <em>"O que está errado aqui?"</em></li>
+          <li><strong>Ameaça</strong> — uma fonte potencial de dano capaz de explorar essa fraqueza. <em>"Quem ou o que pode se aproveitar disso?"</em></li>
+          <li><strong>Risco</strong> — a combinação de probabilidade × impacto quando a ameaça explora a vulnerabilidade. <em>"O que acontece de fato se isso for explorado, e o quão provável é?"</em></li>
+        </ul>
+        <div class="example-box">
+          <span class="label">Decompondo uma observação real do pacote</span>
+          <p><strong>Vulnerabilidade:</strong> o aparelho de ressonância magnética (Siemens MAGNETOM) roda Windows XP, sistema sem suporte de segurança há mais de uma década.</p>
+          <p><strong>Ameaça:</strong> qualquer agente malicioso capaz de explorar falhas conhecidas e não corrigidas do XP — e que tenha acesso à mesma rede plana onde o equipamento está conectado.</p>
+          <p><strong>Risco:</strong> comprometimento ou indisponibilidade de um equipamento crítico de diagnóstico, com impacto direto na capacidade de atendimento e, na cadeia, na segurança do paciente.</p>
+        </div>
+
+        <h4>A mesma vulnerabilidade, riscos diferentes</h4>
+        <p>O risco nunca pode ser avaliado olhando só para a vulnerabilidade — o valor do ativo afetado é o que determina o risco real. Autenticação SSH por senha (em vez de chave) está habilitada em quase todos os servidores Linux da MedDefense. Em <code>ehr-db-01</code>, que guarda prontuários de milhares de pacientes, essa fraqueza representa risco alto. A mesma configuração em um servidor de teste isolado, sem dados sensíveis, representaria risco baixo — mesma vulnerabilidade, exposições completamente diferentes.</p>
+      </article>
+
+      <article id="controles">
+        <h3 class="pillar-title"><span class="num">02</span> Controles de segurança</h3>
+        <p>Todo controle de segurança pode ser classificado em duas dimensões simultâneas: <strong>a que categoria pertence</strong> e <strong>que função exerce</strong>. Dominar essa matriz é o que permite identificar rapidamente lacunas — "temos controles técnicos preventivos, mas nada detectivo" é uma frase que só faz sentido se você souber classificar dessa forma.</p>
+        <ul>
+          <li><strong>Técnico</strong> — implementado através de tecnologia (hardware, software, configuração)</li>
+          <li><strong>Administrativo</strong> — políticas, processos e procedimentos definidos pela organização</li>
+          <li><strong>Físico</strong> — protege o ambiente e os equipamentos fisicamente</li>
+        </ul>
+        <ul>
+          <li><strong>Preventivo</strong> — impede que o incidente aconteça</li>
+          <li><strong>Detectivo</strong> — identifica que algo está acontecendo ou já aconteceu</li>
+          <li><strong>Corretivo</strong> — restaura a operação normal após o incidente</li>
+          <li><strong>Compensatório</strong> — alternativa usada quando o controle ideal não é viável</li>
+          <li><strong>Dissuasório</strong> — desencoraja a tentativa antes mesmo que ela comece</li>
+        </ul>
+
+        <div class="table-wrap">
+          <table>
+            <caption>Matriz categoria × função, com exemplos reais do ambiente MedDefense</caption>
+            <thead><tr><th>Função</th><th>Técnico</th><th>Administrativo</th><th>Físico</th></tr></thead>
+            <tbody>
+              <tr><th>Preventivo</th><td>Firewall FortiGate 100F bloqueando tráfego não autorizado</td><td>Política de senha (mín. 8 caracteres, rotação de 90 dias)</td><td>Guarda de segurança na entrada do Central (seg–sex, 7h–19h)</td></tr>
+              <tr><th>Detectivo</th><td>Alertas do antivírus Sophos ao identificar arquivo malicioso</td><td>Auditoria periódica de contas compartilhadas e logs de acesso</td><td>Câmeras na garagem e na entrada do Pronto-Socorro</td></tr>
+              <tr><th>Corretivo</th><td>Restauração de backup via agente Veeam após um incidente</td><td>Plano formal de resposta a incidentes (que a MedDefense não possui)</td><td>Troca de fechadura ou crachá após comprometimento</td></tr>
+              <tr><th>Compensatório</th><td>Isolamento de rede ao redor do MRI com Windows XP, que não pode ser corrigido</td><td>Verificação manual em dobro quando MFA não está disponível</td><td>Vigilância reforçada temporária no armário destrancado da Westside, até a instalação de fechadura</td></tr>
+              <tr><th>Dissuasório</th><td>Aviso de monitoramento exibido na tela de login</td><td>Termo de responsabilidade assinado e política disciplinar</td><td>Placas de "área restrita" e iluminação do estacionamento</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="example-box">
+          <span class="label">Quando o controle compensatório é a única opção viável</span>
+          <p>O MRI da MedDefense não pode simplesmente "receber um patch" — atualizar o sistema operacional de um equipamento médico regulamentado exige recertificação do fabricante, é caro e pode levar meses. Nesse cenário, o controle ideal (corrigir a vulnerabilidade) é inviável no curto prazo. A resposta é um <strong>controle compensatório</strong>: isolar o equipamento em um segmento de rede próprio, sem acesso direto de estações comuns, reduzindo a exposição sem eliminar a causa raiz.</p>
+        </div>
+      </article>
+
+      <article id="ativos">
+        <h3 class="pillar-title"><span class="num">03</span> Gestão de ativos e dados</h3>
+        <p>Você já praticou o primeiro passo desta competência na Task 0 deste projeto, ao transformar o <code>onboarding_packet.txt</code> — um amontoado de guias de RH, listas parciais de ativos e anotações soltas do Marcus — em um Environment Summary estruturado. Essa é exatamente a habilidade que sustenta um inventário de ativos real: extrair, cruzar e organizar informação de fontes incompletas e conflitantes, sinalizando o que permanece desconhecido em vez de presumir.</p>
+        <p>Depois de inventariados, os ativos são classificados por criticidade usando a própria Tríade CIA como régua: um servidor que, se comprometido, quebra confidencialidade de dados de milhares de pacientes (como <code>ehr-db-01</code>) é mais crítico do que um servidor de impressão interno — mesmo que tecnicamente ambos sejam "só um servidor".</p>
+
+        <h4>Classificação de dados</h4>
+        <p>Nem todo dado exige o mesmo nível de proteção. Classificar por sensibilidade é o que permite decidir, por exemplo, onde criptografia é obrigatória e onde é dispensável.</p>
+        <div class="class-scale">
+          <div class="class-tier" style="--tier-color:var(--risk-low)"><h4>Público</h4><p>Divulgação externa não representa risco</p><span class="ex">site institucional (web-srv-01)</span></div>
+          <div class="class-tier" style="--tier-color:var(--risk-medium)"><h4>Interno</h4><p>Uso interno, não sigiloso, mas não destinado ao público</p><span class="ex">comunicados de RH, memorandos</span></div>
+          <div class="class-tier" style="--tier-color:var(--risk-high)"><h4>Confidencial</h4><p>Exposição causa dano ao negócio</p><span class="ex">faturamento (billing-srv-01), contratos</span></div>
+          <div class="class-tier" style="--tier-color:var(--risk-critical)"><h4>Restrito</h4><p>Exposição causa dano grave, legal ou à segurança de pessoas</p><span class="ex">PHI em ehr-db-01, imagens em pacs-srv-01</span></div>
+        </div>
+
+        <h4>Os três estados do dado</h4>
+        <p>Um mesmo dado precisa de controles diferentes dependendo de onde ele está no seu ciclo de vida:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Estado</th><th>O que é</th><th>Controles típicos</th></tr></thead>
+            <tbody>
+              <tr><th>Em repouso</th><td class="fn">Armazenado em disco, banco de dados ou backup</td><td>Criptografia de disco, controle de acesso, backup isolado — a MedDefense falha aqui: o NAS de backup fica na mesma rede e rack do servidor primário</td></tr>
+              <tr><th>Em trânsito</th><td class="fn">Se movendo pela rede, entre sites ou entre usuário e servidor</td><td>VPN, TLS/HTTPS, segmentação de rede</td></tr>
+              <tr><th>Em uso</th><td class="fn">Sendo processado ativamente em memória ou aplicação</td><td>Controle de acesso por papel, MFA, timeout de sessão</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article id="risco">
+        <h3 class="pillar-title"><span class="num">04</span> Avaliação de risco</h3>
+        <h4>Análise de gaps (gap analysis)</h4>
+        <p>É o cruzamento entre <strong>criticidade do ativo</strong> e <strong>controles hoje existentes</strong>. Um ativo restrito sem nenhum controle detectivo é um gap grave; um ativo público sem controle nenhum pode ser um risco aceitável. A metodologia de gap analysis do ISO 27001 segue um caminho parecido: definir o escopo, avaliar o estado atual, comparar contra os controles de referência (Anexo A), priorizar por risco e documentar os achados — veja a fonte completa na seção de referências.</p>
+
+        <h4>Quatro estratégias de tratamento de risco</h4>
+        <div class="strategy-grid">
+          <div class="strategy-card"><h4>Mitigar</h4><p>Reduzir probabilidade ou impacto implementando controles</p><p class="ex">Ex.: migrar SSH de senha para autenticação por chave</p></div>
+          <div class="strategy-card"><h4>Transferir</h4><p>Repassar o impacto financeiro do risco a terceiros</p><p class="ex">Ex.: apólice de seguro cibernético, SLA contratual com fornecedor</p></div>
+          <div class="strategy-card"><h4>Aceitar</h4><p>Decisão consciente e documentada de conviver com o risco residual</p><p class="ex">Ex.: risco de baixo impacto após controles razoáveis já aplicados</p></div>
+          <div class="strategy-card"><h4>Evitar</h4><p>Eliminar a atividade ou o ativo que gera o risco</p><p class="ex">Ex.: descontinuar um serviço legado sem substituto seguro</p></div>
+        </div>
+
+        <h4>Priorização e validação externa</h4>
+        <p>Nem todo gap merece a mesma urgência: priorize por criticidade do ativo × impacto potencial, não pela ordem em que os achados foram encontrados. E não confie só na sua leitura interna — valide contra inteligência de ameaças real. O <a href="#fontes">HHS HICP</a>, por exemplo, aponta phishing por e-mail, ransomware, perda/roubo de dispositivos, vazamento por insider e ataques a dispositivos médicos conectados como as cinco ameaças mais recorrentes ao setor de saúde — praticamente um mapa direto para os gaps já identificados na MedDefense.</p>
+      </article>
+
+      <article id="comunicacao">
+        <h3 class="pillar-title"><span class="num">05</span> Comunicação profissional</h3>
+        <p>Um Conselho de Administração não lê logs. Ele toma decisões de orçamento com base em impacto ao negócio, não em jargão técnico. A competência final deste projeto é traduzir achados técnicos em linguagem que justifica investimento.</p>
+        <div class="example-box">
+          <span class="label">Afirmação sem justificativa vale zero</span>
+          <p style="color:var(--risk-critical)"><strong>Fraco:</strong> "Isso é risco alto."</p>
+          <p style="color:var(--risk-low)"><strong>Forte:</strong> "Isso é risco alto porque o servidor do EHR armazena dados de saúde protegidos de 50.000 pacientes, não possui nenhum controle detectivo e está acessível a partir da rede geral."</p>
+        </div>
+        <p>Um briefing executivo eficaz é conciso, acionável e justificado em termos de orçamento — cada recomendação deveria responder implicitamente à pergunta "e daí, quanto isso custa não fazer?"</p>
+      </article>
+    </section>
+
+    <section id="fontes">
+      <div class="section-head">
+        <span class="eyebrow">Recursos</span>
+        <h2>Fontes e referências citadas</h2>
+        <p class="dek">Os oito documentos abaixo são a base oficial do projeto. Este material resume o essencial de cada um; a leitura da fonte primária continua sendo necessária.</p>
+      </div>
+
+      <div class="resource-group">
+        <h4>Fundamentos de segurança</h4>
+        <div class="resource-card">
+          <div class="rc-head"><h5>NIST SP 800-12 Rev. 1 — An Introduction to Information Security</h5><span class="badge">NIST</span></div>
+          <p>Referência fundacional que define os oito conceitos centrais de segurança da informação — de "a segurança apoia a missão da organização" a "a segurança é limitada por fatores sociais e culturais" — e estabelece os papéis e responsabilidades formais dentro de um programa de segurança (proprietário do sistema, oficial de segurança do sistema, usuários, entre outros).</p>
+          <p class="focus"><b>Leitura indicada:</b> Capítulos 2 e 3 — Conceitos de Segurança e Papéis.</p>
+          <a class="rc-link" href="https://csrc.nist.gov/pubs/sp/800/12/r1/final" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>NIST SP 800-30 Rev. 1 — Guide for Conducting Risk Assessments</h5><span class="badge">NIST</span></div>
+          <p>Define formalmente risco como função da probabilidade de uma fonte de ameaça explorar uma vulnerabilidade e do impacto resultante. Para ameaças adversárias, o guia orienta avaliar capacidade, intenção e direcionamento do atacante — a base conceitual usada na seção "Fundamentos de segurança" deste material.</p>
+          <p class="focus"><b>Leitura indicada:</b> Capítulo 2 — Os Fundamentos.</p>
+          <a class="rc-link" href="https://csrc.nist.gov/pubs/sp/800/30/r1/final" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+      </div>
+
+      <div class="resource-group">
+        <h4>Controles de segurança</h4>
+        <div class="resource-card">
+          <div class="rc-head"><h5>NIST SP 800-53 Rev. 5 — Security and Privacy Controls</h5><span class="badge">NIST</span></div>
+          <p>O catálogo mais abrangente de controles de segurança e privacidade em uso — 1.196 controles organizados em 20 famílias, incluindo as famílias mais recentes de privacidade (PT) e de gestão de risco na cadeia de suprimentos (SR). O objetivo do projeto não é memorizar cada controle, e sim entender a taxonomia: como os controles são agrupados e por quê.</p>
+          <p class="focus"><b>Leitura indicada:</b> Introdução e Visão Geral das Famílias de Controle.</p>
+          <a class="rc-link" href="https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>CIS Controls v8 — Visão Geral</h5><span class="badge">CIS</span></div>
+          <p>Dezoito controles críticos, organizados em ordem de prioridade prática e fundamentados em dados reais de ataques (MITRE ATT&CK, Verizon DBIR). São divididos em Grupos de Implementação — o IG1, com 56 salvaguardas, representa a higiene cibernética essencial que qualquer organização, do tamanho da MedDefense ou menor, deveria ter implementada primeiro.</p>
+          <p class="focus"><b>Leitura indicada:</b> Descrições de alto nível dos 18 controles.</p>
+          <a class="rc-link" href="https://www.cisecurity.org/controls/v8" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+      </div>
+
+      <div class="resource-group">
+        <h4>Gestão de ativos e proteção de dados</h4>
+        <div class="resource-card">
+          <div class="rc-head"><h5>NIST Cybersecurity Framework 2.0 — Função Identify</h5><span class="badge">NIST</span></div>
+          <p>A função "Identify" é o alicerce de todo o framework: desenvolver o entendimento organizacional dos riscos cibernéticos, incluindo ativos, aplicações e fornecedores. Sua categoria de Gestão de Ativos (ID.AM) é, na prática, a formalização do exercício de inventário feito na Task 0 deste projeto.</p>
+          <p class="focus"><b>Leitura indicada:</b> Função Identify na íntegra — é a base deste projeto.</p>
+          <a class="rc-link" href="https://www.nist.gov/cyberframework" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>CISA — Healthcare and Public Health Sector Mitigation Guide</h5><span class="badge">CISA</span></div>
+          <p>Guia de mitigação específico para o setor de saúde, desenvolvido junto ao HHS e ao Health Sector Coordinating Council. Cobre as vulnerabilidades mais comuns do setor e recomendações concretas — segmentação de rede, proteção de serviços expostos e mitigação de ativos vulneráveis — que se aplicam quase ponto a ponto ao ambiente da MedDefense.</p>
+          <p class="focus"><b>Leitura indicada:</b> Contexto sobre ameaças e desafios específicos da saúde.</p>
+          <a class="rc-link" href="https://www.cisa.gov/resources-tools/resources/mitigation-guide-healthcare-and-public-health-hph-sector" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+      </div>
+
+      <div class="resource-group">
+        <h4>Análise de gaps e tratamento de risco</h4>
+        <div class="resource-card">
+          <div class="rc-head"><h5>ISO 27001 Gap Analysis — IT Governance</h5><span class="badge">ISO 27001</span></div>
+          <p>Explica a metodologia de análise de gaps sem exigir a compra da norma: definir o escopo, avaliar o estado atual (entrevistas, revisão documental, avaliação técnica), comparar contra os controles de referência do Anexo A, priorizar riscos e consolidar tudo em um relatório de achados que vira o roteiro de melhoria.</p>
+          <p class="focus"><b>Leitura indicada:</b> Metodologia completa de gap analysis.</p>
+          <a class="rc-link" href="https://www.itgovernanceusa.com/iso27001-gap-analysis" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>HHS — Health Industry Cybersecurity Practices (HICP)</h5><span class="badge">HHS</span></div>
+          <p>Práticas de segurança específicas para o setor de saúde, mantidas pelo programa 405(d) do HHS. A edição 2023 identifica as cinco ameaças mais recorrentes ao setor — phishing por e-mail, ransomware, perda/roubo de dispositivos, vazamento de dados por insider e ataques a dispositivos médicos conectados — e dez práticas para combatê-las, incorporando também estratégias de Zero Trust e Defesa em Profundidade.</p>
+          <p class="focus"><b>Leitura indicada:</b> Sumário Executivo e Panorama de Ameaças.</p>
+          <a class="rc-link" href="https://405d.hhs.gov/cornerstone/hicp" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="requisitos">
+      <div class="section-head">
+        <span class="eyebrow">Requisitos</span>
+        <h2>Requisitos do projeto</h2>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠ Este material está em português apenas para apoiar seu estudo. Os entregáveis reais do projeto — incluindo o <code>0-environment_summary.md</code> — precisam ser escritos em inglês profissional, conforme o requisito geral abaixo.</p>
+      </div>
+
+      <h4>Geral</h4>
+      <ul class="req-list">
+        <li>Todos os entregáveis devem ser escritos em inglês profissional.</li>
+        <li>Um arquivo <code>README.md</code>, na raiz da pasta do projeto, é obrigatório.</li>
+        <li>Todos os seus arquivos devem terminar com uma nova linha.</li>
+      </ul>
+
+      <h4>Regras específicas do projeto</h4>
+      <ul class="req-list">
+        <li>Não é necessário ambiente de laboratório. Este projeto é baseado em artefatos — você analisa documentos fornecidos, não sistemas ativos.</li>
+        <li>Tom profissional é obrigatório. Todo entregável deve parecer que está sendo enviado a um cliente real. Sem gírias, sem enrolação, sem linguagem vaga.</li>
+        <li>Justifique tudo. Afirmações sem raciocínio valem zero — "isso é risco alto" não diz nada; "isso é risco alto porque o servidor do EHR armazena dados de saúde protegidos de 50.000 pacientes, não tem controles detectivos e é acessível pela rede geral" diz tudo.</li>
+        <li>Conformidade de formato. Cada tarefa especifica um formato de entrega — siga-o exatamente. No mundo profissional, um relatório que não segue o formato pedido pelo cliente simplesmente não é lido.</li>
+      </ul>
+
+      <a class="back-to-top" href="#introducao">↑ Voltar ao início</a>
+    </section>
+
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p>Material de estudo preparado a partir do enunciado oficial do Projeto 0 (MedDefense Health Systems) e das fontes referenciadas na seção Recursos. Não substitui a leitura das fontes primárias. Última atualização: 12 de julho de 2026.</p>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var toggle = document.getElementById('themeToggle');
+    var icon = document.getElementById('themeIcon');
+    var label = document.getElementById('themeLabel');
+
+    function applyTheme(theme) {
+      if (theme) { root.setAttribute('data-theme', theme); }
+      else { root.removeAttribute('data-theme'); }
+      var isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      icon.textContent = isDark ? '◑' : '◐';
+      label.textContent = isDark ? 'Escuro' : 'Claro';
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    applyTheme(saved);
+
+    toggle.addEventListener('click', function () {
+      var current = root.getAttribute('data-theme');
+      var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var next = isDark ? 'light' : 'dark';
+      applyTheme(next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+
+    // Scroll-spy for TOC
+    var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    var targets = links.map(function (a) {
+      return document.getElementById(a.getAttribute('href').slice(1));
+    }).filter(Boolean);
+
+    if ('IntersectionObserver' in window && targets.length) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var id = entry.target.id;
+          var link = links.find(function (a) { return a.getAttribute('href') === '#' + id; });
+          if (!link) return;
+          if (entry.isIntersecting) {
+            links.forEach(function (a) { a.classList.remove('active'); });
+            link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+      targets.forEach(function (t) { observer.observe(t); });
+    }
+  })();
+</script>

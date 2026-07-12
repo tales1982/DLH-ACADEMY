@@ -1,0 +1,274 @@
+================================================================================
+                    MEDDEFENSE HEALTH SYSTEMS
+                    Pacote de Documentação Interna
+                    Compilado para: Novo Analista de Segurança
+                    Data: [Atual]
+================================================================================
+
+------------------------------------------------------------------------
+DOCUMENTO 1: GUIA DE INTEGRAÇÃO DE RH (TRECHO)
+------------------------------------------------------------------------
+
+Bem-vindo(a) à MedDefense Health Systems! Temos orgulho de servir nossa
+comunidade através de três localidades:
+
+MEDDEFENSE CENTRAL HOSPITAL
+  Unidade de cuidados intensivos com 350 leitos, localizada no centro da cidade
+  Departamentos: Emergência, Cirurgia, Cardiologia, Radiologia, Oncologia,
+  Pediatria, Maternidade, Farmácia, Laboratório, Administração
+  Equipe aproximada: 1.400 (clínica + suporte)
+  Prédio: 6 andares + subsolo (sala mecânica/servidores)
+  Estacionamento: garagem subterrânea (equipe) + pátio externo (visitantes)
+
+WESTSIDE CLINIC
+  Unidade ambulatorial, localizada em área suburbana (12 min de carro do Central)
+  Serviços: Atendimento primário, imagem diagnóstica (raio-X, ultrassom -- sem RM),
+  exames de sangue, pequenos procedimentos, fisioterapia
+  Equipe aproximada: 180
+  Prédio: complexo médico de 2 andares, estacionamento compartilhado com
+  shopping de varejo adjacente
+  Observação: Westside compartilha alguns serviços de TI com o Central, mas tem
+  seu próprio armário de servidores local para "necessidades básicas"
+  (palavras de Sarah Park)
+
+CORPORATE HQ (Sede Administrativa)
+  Escritórios administrativos no Greenfield Business Park (15 min do Central)
+  Departamentos: Financeiro, RH, Jurídico, Marketing, Diretoria Executiva, TI
+  Equipe aproximada: 220
+  Prédio: espaço de escritório alugado, 3º andar de um edifício comercial
+  de 5 andares
+  O departamento de TI está localizado aqui (12 funcionários no total)
+
+Total de funcionários em toda a organização: aproximadamente 2.000
+
+------------------------------------------------------------------------
+DOCUMENTO 2: LISTA DE ATIVOS DE TI (Exportado do ServiceDesk -- PARCIAL)
+------------------------------------------------------------------------
+
+NOTA DE SARAH PARK (DIRETORA DE TI):
+"Isto é o que temos no sistema de tickets. Não está completo. Algumas
+coisas foram adicionadas pelo gerente de TI anterior, outras pelo Marcus,
+outras pela minha equipe. Qualquer item marcado [NÃO VERIFICADO] não foi
+confirmado fisicamente há mais de um ano."
+
+SERVIDORES -- MEDDEFENSE CENTRAL
+  ehr-srv-01        | Ubuntu 20.04 LTS     | Servidor de Aplicação do Prontuário Eletrônico (EHR)
+  ehr-db-01         | Ubuntu 20.04 LTS     | Banco de Dados do EHR (PostgreSQL)
+  pacs-srv-01       | Windows Server 2016  | Servidor de Imagens PACS
+  billing-srv-01    | Ubuntu 18.04 LTS     | Processamento de Faturamento/Cobranças
+  ad-dc-01          | Windows Server 2019  | Controlador de Domínio Primário
+  ad-dc-02          | Windows Server 2019  | Controlador de Domínio Secundário
+  file-srv-01       | Windows Server 2016  | Compartilhamentos de Arquivos por Departamento
+  print-srv-01      | Windows Server 2012R2| Servidor de Impressão [NÃO VERIFICADO]
+  backup-srv-01     | Ubuntu 22.04 LTS     | Servidor de Backup (agente Veeam)
+  web-srv-01        | Ubuntu 20.04 LTS     | Site Público + Portal do Paciente
+
+SERVIDORES -- WESTSIDE CLINIC
+  ws-srv-01         | Windows Server 2016  | Servidor de arquivos local + agendamento
+  [Nota de Marcus: "Pode haver outro servidor no armário da Westside.
+   Mike Torres mencionou isso, mas eu nunca confirmei. Verificar."]
+
+SERVIDORES -- CORPORATE HQ
+  Nenhum servidor local (on-premise). A equipe da sede usa serviços em nuvem
+  e se conecta à infraestrutura do Central via VPN site-a-site.
+
+EQUIPAMENTO DE REDE (PARCIAL)
+  Central: switch núcleo Cisco (modelo desconhecido), 2x switches de acesso
+           Cisco por andar, 1x firewall Fortinet FortiGate 100F
+  Westside: 1x switch não gerenciado (marca desconhecida), 1x roteador
+            de nível consumidor
+            [Nota de Marcus: "Isso NÃO é aceitável para uma unidade médica"]
+  HQ: gerenciado pela administração do prédio, MedDefense tem sua própria VLAN
+  WiFi: Access Points Ubiquiti UniFi no Central (12 unidades), desconhecido na Westside
+
+ENDPOINTS
+  Central: ~320 estações Windows 10, ~60 thin clients em áreas clínicas
+  Westside: ~45 estações Windows 10
+  HQ: ~120 estações Windows 10/11, ~30 laptops (com capacidade remota)
+  Tablets: ~25 iPads usados por médicos nas visitas (gerenciados? não está claro)
+  [Nota de Marcus: "Ninguém tem uma contagem completa de endpoints. Os números
+   acima são do último relatório do AD, mas isso foi há 8 meses."]
+
+DISPOSITIVOS MÉDICOS (IoT)
+  Monitores de paciente conectados: ~80 unidades no Central (Philips IntelliVue)
+  Bombas de infusão: ~120 unidades (BD Alaris), conectadas em rede para
+  atualizações de dosagem
+  Ressonância Magnética (MRI): 1x Siemens MAGNETOM (departamento de Radiologia, Central)
+    [Nota de Marcus: "CRÍTICO -- roda Windows XP. Ver arquivo separado."]
+  Tomógrafo (CT): 1x GE Revolution (Central) -- sistema operacional desconhecido
+  Sistema de chamada de enfermagem: baseado em IP, integrado ao sistema telefônico
+  Sistema de crachá/acesso: HID Global, conectado ao AD para algumas portas
+
+------------------------------------------------------------------------
+DOCUMENTO 3: ANOTAÇÕES DE MARCUS WEBB (Encontradas no drive compartilhado: S:\Security\Notes)
+------------------------------------------------------------------------
+
+Arquivo: security_observations.txt
+Última modificação: [3 meses atrás]
+
+=== ANOTAÇÕES RÁPIDAS -- NÃO COMPARTILHAR ===
+
+Coisas que eu preciso documentar formalmente mas não tive tempo:
+
+REDE:
+- Rede plana (flat network) no Central. Dispositivos médicos, estações de
+  trabalho, servidores, tudo no mesmo domínio de broadcast (10.10.0.0/16).
+  Isso é insano. Levantei o assunto com a Sarah. Ela disse que a segmentação
+  está "planejada para o próximo ano fiscal." Isso foi há 4 meses.
+- A clínica Westside NÃO TEM firewall. O tráfego passa por um roteador
+  de nível consumidor (Netgear Nighthawk -- sim, sério) diretamente para
+  uma conexão de ISP. A VPN site-a-site para o Central roda nesse roteador.
+- O WiFi de visitantes no Central EXISTE (SSID separado), mas não tenho
+  certeza de que está realmente isolado. Preciso verificar.
+- A VPN da HQ parece configurada corretamente, mas eu não auditei as ACLs.
+
+SERVIDORES:
+- billing-srv-01 continua tendo problemas de performance. A TI só reinicia
+  o servidor. Alguma coisa está errada. Post-it no meu monitor como lembrete.
+- print-srv-01 está rodando Server 2012 R2. O fim do suporte foi em
+  outubro de 2023. Parece que ninguém se importa.
+- backup-srv-01: o Veeam roda backups noturnos para um NAS local. O NAS
+  está na mesma sala de servidores, na mesma rede, no mesmo rack. Se formos
+  atingidos por ransomware, perdemos os dois. Eu mencionei backup em
+  nuvem/offsite para o James. O orçamento foi negado.
+- ehr-db-01: o PostgreSQL está acessível a partir de toda a faixa
+  10.10.0.0/16. Deveria estar restrito apenas ao ehr-srv-01.
+
+AUTENTICAÇÃO:
+- Política de senha: mínimo de 8 caracteres, rotação a cada 90 dias,
+  complexidade habilitada. Não é terrível, mas também não é boa. Não há
+  MFA em lugar nenhum, exceto na conta pessoal do James (ele mesmo configurou).
+- Contas compartilhadas: o departamento de radiologia usa um login
+  compartilhado para a estação PACS ("raduser / radiology1"). Eu reportei
+  isso. Nada aconteceu.
+- SSH: a autenticação por senha ainda está habilitada em todos os
+  servidores Linux. Deveria ser somente por chave. Comecei a migração,
+  mas só cheguei ao ehr-srv-01 antes... bem, antes de ficar sem tempo.
+
+FÍSICO:
+- O acesso por crachá da sala de servidores é o mesmo crachá genérico que
+  todo mundo recebe. Ver meu e-mail para a Sarah de [5 meses atrás].
+  Resposta: "está no roadmap."
+- Não há câmeras no corredor da sala de servidores. Existem câmeras na
+  garagem e na entrada do PS (Pronto-Socorro), mas nenhuma perto da
+  infraestrutura de TI.
+- A Westside praticamente não tem segurança física alguma para o
+  equipamento de TI. O "armário de servidores" nem tranca.
+
+CONFORMIDADE (COMPLIANCE):
+- A conformidade com a HIPAA Security Rule nunca foi formalmente avaliada.
+  O James está ciente e preocupado. O Jurídico diz que "estamos em
+  conformidade", mas não tem nenhuma evidência disso.
+- Não existe um plano formal de resposta a incidentes. Quando o ransomware
+  atingiu o billing-srv-01 em janeiro, a resposta foi improvisada. James,
+  Sarah e eu basicamente improvisamos por 4 dias.
+- Não há plano de continuidade de negócios. Não há plano de recuperação
+  de desastres. Se o Central perder energia além do que o nobreak (UPS)
+  aguenta (cerca de 20 minutos), não existe procedimento documentado
+  para as operações clínicas.
+
+O QUE EU AINDA NÃO CONSEGUI FAZER:
+- Avaliação formal de vulnerabilidades em todos os servidores
+- Avaliação de segurança de endpoints (o antivírus é o Sophos, mas eu não
+  sei se está atualizado em todas as máquinas)
+- Inventário de serviços em nuvem (o O365 é o principal, mas suspeito que
+  departamentos individuais usem outros)
+- Análise do cenário de ameaças -- quem ataca hospitais e como? Comecei a
+  pesquisar, mas não terminei.
+- Os dispositivos IoT. Meu Deus, os dispositivos IoT. Aqueles monitores
+  Philips estão na mesma rede que tudo o mais. As bombas de infusão também.
+  Se alguém entrar na rede, consegue alcançar as bombas. Eu tento não
+  pensar nisso.
+
+=== FIM DAS ANOTAÇÕES ===
+
+------------------------------------------------------------------------
+DOCUMENTO 4: RESUMO DE CONTRATOS DE SERVIÇOS DE TI (Do Financeiro)
+------------------------------------------------------------------------
+
+FORNECEDOR                | SERVIÇO                         | CUSTO ANUAL      | RENOVAÇÃO
+Sophos                    | Proteção de Endpoint            | $18.000          | Jan
+Veeam                     | Software de Backup              | $8.500           | Mar
+Fortinet                  | Suporte FortiGate               | $4.200           | Jun
+Microsoft                 | O365 E3 (toda a organização)    | $432.000         | Set
+Ubiquiti                  | Licença do controlador UniFi    | $0 (grátis)      | N/A
+Greenfield Bldg Mgmt      | Rede/internet da HQ             | incl. no aluguel | N/A
+ClearView Security        | Serviço de segurança (Central)  | $96.000          | Dez
+  Observações: 1 guarda, entrada principal, Seg-Sex 7h-19h. Sem cobertura
+  de fim de semana/noturna. Sem guarda na Westside ou na HQ.
+MedTech Solutions         | Manutenção do EHR               | $145.000         | Jul
+  Observações: Inclui atualizações de software, não de hardware. SLA:
+  resposta em 4h para questões críticas, 24h para padrão.
+
+------------------------------------------------------------------------
+DOCUMENTO 5: DIAGRAMA DE REDE (rascunho do Marcus -- incompleto)
+------------------------------------------------------------------------
+
+    [INTERNET]
+        |
+   [FortiGate 100F]---[DMZ: web-srv-01]
+        |
+   [Switch Núcleo]
+        |
+   +----+----+----+----+
+   |    |    |    |    |
+  And1 And2 And3 And4 Servidores
+   |                    |
+  APs                 ehr-srv-01
+  Estações de trabalho ehr-db-01
+  Thin clients        pacs-srv-01
+  Dispositivos médicos billing-srv-01
+  Monitores            ad-dc-01/02
+  Bombas de infusão    file-srv-01
+                       print-srv-01
+                       backup-srv-01 --> [NAS]
+
+  OBSERVAÇÃO: Tudo em 10.10.0.0/16
+  Nenhuma VLAN configurada
+  Marcus: "Este diagrama está simplificado. A topologia real
+  é mais bagunçada. Vou atualizar quando eu tiver tempo."
+
+  [Westside Clinic] ---- VPN IPSec ----> [FortiGate]
+  (via roteador consumidor Netgear)
+
+  [Corporate HQ] ---- VPN site-a-site ----> [FortiGate]
+  (via rede gerenciada pelo prédio)
+
+------------------------------------------------------------------------
+DOCUMENTO 6: ORGANOGRAMA (Relevante para Segurança)
+------------------------------------------------------------------------
+
+  CEO: Dra. Patricia Morales
+    |
+    +-- CFO: Robert Kim
+    |
+    +-- COO: Angela Torres
+    |     |
+    |     +-- Diretores Clínicos (por departamento)
+    |
+    +-- Diretor Jurídico (General Counsel): David Park
+    |
+    +-- CISO (cargo vago -- James Chen é Deputy CISO, interino)
+          |
+          +-- James Chen, Deputy CISO
+          |     |
+          |     +-- Analista de Segurança: [VOCÊ] (substituindo Marcus Webb)
+          |
+          +-- Sarah Park, Diretora de TI
+                |
+                +-- 3x Administradores de Sistema
+                +-- 2x Técnicos de Rede
+                +-- 1x Administrador de Banco de Dados
+                +-- 2x Analistas de Helpdesk (incl. Mike Torres, líder)
+                +-- 2x Técnicos de Suporte de Desktop
+                +-- 1x Estagiário de TI (posição atualmente vaga)
+
+  OBSERVAÇÃO: James se reporta ao cargo vago de CISO. Na prática, ele se
+  reporta diretamente ao CEO. Sarah Park (Diretora de TI) e James Chen
+  (Deputy CISO) são pares hierárquicos. James tem autoridade sobre a
+  política de segurança, mas nenhuma autoridade sobre as operações de TI.
+  Isso gera atrito.
+
+========================================================================
+                    FIM DO PACOTE DE DOCUMENTAÇÃO
+========================================================================
