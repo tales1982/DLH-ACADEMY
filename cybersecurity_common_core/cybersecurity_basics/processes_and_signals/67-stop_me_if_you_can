@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Script that interrupts the process from 4 to infinity without using kill or killall.
+pkill -f "7-highlander"
