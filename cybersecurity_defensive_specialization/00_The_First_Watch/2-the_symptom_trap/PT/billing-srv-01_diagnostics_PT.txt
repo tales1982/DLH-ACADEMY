@@ -1,0 +1,133 @@
+================================================================================
+         MEDDEFENSE HEALTH SYSTEMS -- OPERAÇÕES DE TI
+         Relatório de Diagnóstico de Servidor
+         Host: billing-srv-01 (10.10.2.15)
+         Capturado por: Suporte Técnico (ticket #4471)
+         Data: [Atual - 2 dias]
+         Motivo: "Degradação recorrente de performance -- saturação de CPU"
+================================================================================
+
+------------------------------------------------------------------------
+INFORMAÇÕES DO SISTEMA
+------------------------------------------------------------------------
+Hostname:        billing-srv-01
+SO:              Ubuntu 18.04.6 LTS (Bionic Beaver)
+Kernel:          4.15.0-213-generic
+Uptime:          12 dias, 3 horas, 47 minutos
+Último reboot:   [12 dias atrás] -- reinício manual pelo administrador (ticket #4398)
+
+------------------------------------------------------------------------
+SAÍDA DO TOP (Snapshot às 14:22:07)
+------------------------------------------------------------------------
+(saída de comando -- mantida no original em inglês, é evidência técnica bruta)
+
+top - 14:22:07 up 12 days,  3:47,  2 users,  load average: 4.87, 4.92, 4.88
+Tasks: 187 total,   2 running, 185 sleeping,   0 stopped,   0 zombie
+%Cpu(s): 96.3 us,  1.2 sy,  0.0 ni,  1.8 id,  0.0 wa,  0.4 si,  0.3 st
+MiB Mem :  7963.4 total,   412.8 free,  6104.2 used,  1446.4 buff/cache
+MiB Swap:  2048.0 total,  1847.3 free,   200.7 used.  1583.2 avail Mem
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+ 8834 www-data  20   0  458392  24816   3204 R  94.2   3.1  16421:33 ./kworker -o stratum+tcp://pool.monero.org:4443 --threads 4 --donate-level 0
+ 1102 root      20   0  456284 671804  12340 S   2.1   8.4    142:18 /usr/sbin/apache2 -k start
+ 1455 mysql     20   0 2458920 1003284 18480 S   1.3  12.6     98:44 /usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql
+  892 root      20   0   72304   6124   5412 S   0.3   0.1      8:22 /usr/sbin/sshd -D
+ 1198 root      20   0  185272   3788   3224 S   0.0   0.0      0:44 /usr/sbin/cron -f
+    1 root      20   0  225444   9428   6676 S   0.0   0.1      2:15 /sbin/init
+  478 root      20   0   47760   6788   5908 S   0.0   0.1      0:03 /lib/systemd/systemd-udevd
+  612 syslog    20   0  263036   4460   3644 S   0.0   0.1      1:12 /usr/sbin/rsyslogd -n -iNONE
+
+------------------------------------------------------------------------
+SAÍDA DO NETSTAT (Conexões de Internet Ativas)
+------------------------------------------------------------------------
+
+Proto  Recv-Q Send-Q  Local Address          Foreign Address        State       PID/Program
+tcp         0      0  10.10.2.15:45892       185.243.115.89:4443    ESTABLISHED 8834/./kworker
+tcp         0      0  10.10.2.15:45901       91.121.87.10:8080      ESTABLISHED 8834/./kworker
+tcp         0      0  10.10.2.15:46012       104.238.140.32:3333    ESTABLISHED 8834/./kworker
+tcp         0      0  10.10.2.15:80          0.0.0.0:*              LISTEN      1102/apache2
+tcp         0      0  10.10.2.15:22          0.0.0.0:*              LISTEN      892/sshd
+tcp         0      0  10.10.2.15:3306        0.0.0.0:*              LISTEN      1455/mysqld
+tcp         0      0  10.10.2.15:22          10.10.1.50:52341       ESTABLISHED 892/sshd
+
+------------------------------------------------------------------------
+DETALHES DO PROCESSO -- PID 8834
+------------------------------------------------------------------------
+
+$ ls -la /proc/8834/exe
+lrwxrwxrwx 1 www-data www-data 0 [data] /proc/8834/exe -> /var/www/html/.cache/kworker
+
+$ ls -la /var/www/html/.cache/
+total 2148
+drwxr-xr-x 2 www-data www-data    4096 [data - 14 dias] .
+drwxr-xr-x 5 www-data www-data    4096 [data - 14 dias] ..
+-rwxr-xr-x 1 www-data www-data 2191024 [data - 14 dias] kworker
+-rw-r--r-- 1 www-data www-data     284 [data - 14 dias] config.json
+
+$ cat /var/www/html/.cache/config.json
+{
+    "pools": [
+        {"url": "stratum+tcp://pool.monero.org:4443", "user": "48Bv3...REDACTED...Kj2", "pass": "x"},
+        {"url": "stratum+tcp://91.121.87.10:8080", "user": "48Bv3...REDACTED...Kj2", "pass": "x"},
+        {"url": "stratum+tcp://104.238.140.32:3333", "user": "48Bv3...REDACTED...Kj2", "pass": "x"}
+    ],
+    "cpu-priority": 5,
+    "threads": 4,
+    "donate-level": 0,
+    "background": true
+}
+
+$ stat /var/www/html/.cache/kworker
+  File: /var/www/html/.cache/kworker
+  Size: 2191024     Blocks: 4288       IO Block: 4096   regular file
+Access: (0755/-rwxr-xr-x)  Uid: (   33/www-data)   Gid: (   33/www-data)
+Access: [data - 14 dias]
+Modify: [data - 14 dias]
+Change: [data - 14 dias]
+
+------------------------------------------------------------------------
+ANOTAÇÕES DO ADMINISTRADOR (do ticket #4471)
+------------------------------------------------------------------------
+
+Ticket aberto por: Tom Reeves (Administrador de Sistemas)
+Assunto: billing-srv-01 -- saturação recorrente de CPU
+
+"Terceira vez este mês. CPU travada em 100%. O time financeiro reporta
+que o app de faturamento está lento. Reiniciei o Apache e o serviço MySQL,
+melhorou por cerca de 2 horas e depois degradou de novo. O servidor tem
+4 anos, com 8GB de RAM e 4 vCPUs. Provavelmente subdimensionado para a
+carga de trabalho de faturamento. Recomendo migração para uma nova VM
+com 16GB de RAM e 8 vCPUs."
+
+"Além disso, o servidor ainda está no Ubuntu 18.04, que vai sair de
+suporte (EOL) em breve. A migração resolveria os dois problemas."
+
+Resolução: Pendente -- aguardando aprovação de orçamento para nova VM.
+
+------------------------------------------------------------------------
+CONTEXTO ADICIONAL (Do arquivo de anotações do Marcus)
+------------------------------------------------------------------------
+
+Anotação do Marcus sobre o billing-srv-01:
+"O Tom fica reiniciando o servidor. O problema volta. Isso NÃO é um
+problema de capacidade. Olhem a lista de processos -- o que é esse
+'kworker' rodando como www-data? Processos kworker de verdade são
+threads do kernel, aparecem como [kworker] entre colchetes e rodam
+como root. Esse aqui está em /var/www/html/.cache e roda como www-data.
+Alguma coisa entrou através do Apache.
+
+Verifiquem se o Apache tinha uma vulnerabilidade não corrigida na época
+em que isso começou. O app de faturamento roda em Apache 2.4.29 -- há
+vulnerabilidades de RCE (execução remota de código) conhecidas para
+essa versão.
+
+Este servidor foi reconstruído depois do ransomware de janeiro. Se a
+mesma vulnerabilidade não foi corrigida durante a reconstrução, o
+servidor foi reinfectado. Payload diferente desta vez (minerador em
+vez de ransomware), mas o mesmo ponto de entrada.
+
+Preciso escalar isso mas não tenho tempo. Post-it no monitor."
+
+========================================================================
+                  FIM DO RELATÓRIO DE DIAGNÓSTICO
+========================================================================

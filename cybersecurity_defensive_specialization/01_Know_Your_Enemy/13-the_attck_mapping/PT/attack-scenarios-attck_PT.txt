@@ -1,0 +1,182 @@
+================================================================================
+          NARRATIVAS DE CENÁRIO DE ATAQUE PARA MAPEAMENTO ATT&CK
+          Contexto: MedDefense Health Systems
+          Propósito: Mapear cada passo para táticas e técnicas do MITRE ATT&CK
+================================================================================
+
+========================================================================
+CENÁRIO ALPHA: "Operação Flatline" -- Campanha de Ransomware
+========================================================================
+
+Ator de Ameaça: Afiliado BlackReef (crime organizado / RaaS)
+Alvo: MedDefense Health Systems
+Objetivo: Dupla extorsão (roubo de dados + criptografia)
+
+--- NARRATIVA ---
+
+PASSO 1:
+Um afiliado da BlackReef compra uma lista de organizações de saúde com
+appliances de VPN Fortinet de um corretor de acesso inicial num fórum
+da dark web. A lista foi montada escaneando a internet em busca de
+interfaces de gerenciamento FortiGate e cruzando com bases de dados
+do setor de saúde. O afiliado paga $2.500 por uma lista de 40
+organizações, incluindo a MedDefense.
+
+PASSO 2:
+O afiliado cria um e-mail de spear phishing mirando Sarah Park
+(Diretora de TI, MedDefense). O e-mail parece vir do suporte Fortinet
+e avisa sobre uma vulnerabilidade crítica de firmware. Ele inclui um
+link para um portal de suporte Fortinet falso que hospeda um
+documento malicioso. Sarah baixa e abre o documento na estação dela
+(WS-HQ-01 na Corporate HQ). Uma macro executa um comando PowerShell
+que baixa e roda um payload de reverse shell.
+
+PASSO 3:
+O reverse shell se conecta ao servidor de comando e controle do
+afiliado. O afiliado agora tem um ponto de apoio na estação da Sarah
+(10.10.20.10) na Corporate HQ. Eles instalam um backdoor persistente
+criando uma tarefa agendada que reestabelece a conexão a cada 30
+minutos, disfarçada como uma tarefa de Windows Update.
+
+PASSO 4:
+A partir da estação da Sarah, o afiliado roda comandos de descoberta
+de rede: "nltest /dclist:", "net group 'Domain Admins' /domain", e
+"arp -a" pra mapear a rede. Como a HQ se conecta à Central via VPN
+site-to-site e a rede é plana, o afiliado consegue ver toda a faixa
+10.10.0.0/16. Eles identificam o ad-dc-01 (10.10.2.20), ehr-srv-01
+(10.10.2.10), ehr-db-01 (10.10.2.11), billing-srv-01 (10.10.2.15) e
+backup-srv-01 (10.10.2.40) / NAS-01 (10.10.2.41).
+
+PASSO 5:
+O afiliado usa o Mimikatz na estação da Sarah pra extrair credenciais
+armazenadas em cache na memória. A conta da Sarah tem direitos de
+admin local na estação dela, mas não direitos de domain admin.
+Porém, a extração de credenciais revela que uma conta de domain
+admin (svc_backup) foi usada pra autenticar nessa máquina durante
+uma sessão recente de resolução de problema de backup. O hash NTLM
+dessa conta é capturado.
+
+PASSO 6:
+Usando o hash da svc_backup, o afiliado realiza um ataque
+pass-the-hash pra se autenticar no ad-dc-01 (10.10.2.20). Eles agora
+têm acesso de Domain Admin a todo o ambiente Active Directory da
+MedDefense. Eles verificam o acesso consultando o domínio por todos
+os objetos de computador.
+
+PASSO 7:
+Antes de implantar o ransomware, o afiliado localiza dados de alto
+valor. Eles se conectam ao ehr-db-01 (10.10.2.11:5432) -- o banco de
+dados PostgreSQL é acessível de qualquer lugar da rede sem
+autenticação adicional além do acesso em nível de SO. Eles usam o
+pg_dump pra exportar o banco de dados de pacientes (aproximadamente
+35 GB). Eles também acessam o file-srv-01 pra documentos de RH e
+financeiros (8 GB). Os dados são compactados e exfiltrados pra uma
+conta de armazenamento em nuvem controlada pelo atacante usando
+Rclone via HTTPS. Nenhum alerta é gerado.
+
+PASSO 8:
+O afiliado mira a infraestrutura de backup. O NAS-01 (10.10.2.41)
+está na mesma rede e é acessível via sua interface web (porta 5001).
+Usando as credenciais de domain admin, eles acessam a interface de
+gerenciamento do NAS e apagam todos os jobs de backup e os backups
+armazenados. Eles também apagam as Cópias de Sombra de Volume em
+todos os sistemas Windows usando "vssadmin delete shadows /all
+/quiet".
+
+PASSO 9:
+O afiliado cria um Objeto de Política de Grupo (GPO) no ad-dc-01 que
+implanta o payload do ransomware BlackReef em todos os sistemas
+Windows ingressados no domínio no próximo ciclo de atualização de
+Política de Grupo (dentro de 90 minutos). O ransomware criptografa
+todos os discos locais e compartilhamentos de rede acessíveis.
+Servidores Linux (ehr-srv-01, billing-srv-01) são mirados
+separadamente via SSH usando credenciais encontradas num arquivo de
+configuração no file-srv-01.
+
+--- FIM DO CENÁRIO ALPHA ---
+
+
+========================================================================
+CENÁRIO BETA: "A Saída Silenciosa" -- Roubo de Dados por Insider
+========================================================================
+
+Ator de Ameaça: Insider malicioso (funcionária do departamento de faturamento)
+Alvo: Registros de pacientes e dados financeiros
+Objetivo: Roubo de dados pra ganho financeiro (venda de registros)
+
+--- NARRATIVA ---
+
+PASSO 1:
+Maria, funcionária do departamento de faturamento na MedDefense
+Central, descobre que vai ser demitida como parte de uma iniciativa
+de redução de custos. Ela tem 3 semanas até seu último dia. Maria
+está na MedDefense há 4 anos e tem acesso legítimo ao sistema de
+faturamento (billing-srv-01) e ao sistema de EHR (acesso somente
+leitura pra fins de verificação de faturamento). Ela decide copiar
+registros de pacientes pra vender no mercado negro.
+
+PASSO 2:
+Maria começa avaliando quais dados ela consegue acessar através das
+suas aplicações normais de trabalho. Pela interface de faturamento,
+ela consegue ver nomes de pacientes, datas de nascimento, informação
+de seguro, códigos de diagnóstico e valores de cobrança. Pelo seu
+acesso somente leitura ao EHR, ela consegue ver históricos médicos e
+registros de prescrição. Ela nota que a aplicação de EHR não limita
+o número de registros que ela pode ver numa sessão nem alerta sobre
+volumes de acesso incomuns.
+
+PASSO 3:
+Nas duas semanas seguintes, Maria acessa aproximadamente 200
+registros de pacientes por dia durante seu horário normal de
+trabalho, misturados com seu trabalho legítimo. Ela usa a função de
+exportação embutida do EHR pra baixar arquivos CSV de dados de
+pacientes pra sua estação de trabalho. A função de exportação está
+disponível pra todos os usuários com acesso de leitura -- nenhuma
+autorização adicional é exigida. Nenhum alerta é disparado porque o
+log de auditoria do EHR registra o acesso, mas ninguém revisa os
+logs.
+
+PASSO 4:
+Maria transfere os arquivos CSV da sua estação pra um pendrive
+pessoal. Nenhuma Política de Grupo restringe dispositivos de
+armazenamento USB nas estações da MedDefense. Ela conecta o pendrive
+na sua mesa sem preocupação, porque já viu outros funcionários
+usarem pendrives pra fins pessoais sem consequência. Ao longo de 2
+semanas, ela acumula aproximadamente 2.800 registros de pacientes.
+
+PASSO 5:
+Pra cobrir seus rastros, Maria apaga os arquivos CSV da sua estação
+e esvazia a lixeira. Ela não sabe que a aplicação de EHR mantém seu
+próprio log de auditoria de acesso no ehr-srv-01, que ela não
+consegue acessar nem modificar. Porém, como o Marcus observou, esses
+logs exigem uma solicitação de exportação ao fornecedor com prazo de
+48 horas e nunca são revisados proativamente.
+
+PASSO 6:
+No seu penúltimo dia, Maria percebe que a aplicação de faturamento
+armazena credenciais de conexão com o banco de dados num arquivo de
+configuração na sua estação (uma prática que ela descobriu meses
+atrás). Ela copia esse arquivo pro pendrive também, o que lhe dá
+credenciais de acesso direto ao banco de dados do billing-srv-01
+mesmo depois que seu acesso à rede for revogado.
+
+PASSO 7:
+Chega o último dia de Maria. O RH processa a saída dela. O gestor
+dela submete um chamado pra TI solicitando a desativação da conta. O
+chamado fica na fila por 5 dias úteis antes de ser processado (a TI
+não tem SLA pra chamados de desligamento nem desativação automática
+vinculada ao encerramento no RH). Durante esses 5 dias, as
+credenciais de VPN da Maria continuam ativas.
+
+PASSO 8:
+Três dias depois do último dia dela, Maria se conecta à VPN da
+MedDefense de casa usando suas credenciais ainda ativas. Ela acessa
+o billing-srv-01 usando as credenciais de banco de dados que
+guardou e extrai mais 400 registros diretamente do banco de dados.
+Em seguida, ela se desconecta e não acessa a rede novamente.
+
+--- FIM DO CENÁRIO BETA ---
+
+========================================================================
+          FIM DOS CENÁRIOS DE ATAQUE
+========================================================================

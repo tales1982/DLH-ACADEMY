@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)",
+      "Bash(python3 -c ' *)",
+      "Bash(cd /home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn && pwd && ls -la)",
+      "Read(//home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn/**)",
+      "Bash(cd /home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn && find supabase -type f | sort)",
+      "Bash(cd /home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn && find src -type d | sort)",
+      "Read(//home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn/src/lib/**)",
+      "Bash(cd /home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn && grep -n \"phase\\\\|Phase\\\\|Common Core\\\\|CyberAcademy\" src/routes/_authenticated/my-courses.tsx src/routes/index.tsx src/i18n/locales/en.json 2>/dev/null | head -60)",
+      "Bash(cd /home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn && sed -n '1,60p' src/routes/index.tsx)",
+      "Read(//home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn/src/routes/_authenticated/**)",
+      "Read(//home/tales/Documents/GITHUB/DLH-ACADEMY/cybersecurity_defensive_specialization/src/routes/_authenticated/**)",
+      "Bash(npx tsc *)",
+      "Bash(grep -i 'my-courses\\\\|sections.$id\\\\|lib/sections\\\\|lib/progress')",
+      "Bash(echo \"EXIT:$?\")",
+      "Read(//home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn/src/i18n/locales/**)",
+      "Bash(cd /home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn && sed -n '4315,4340p' src/i18n/locales/en.json)",
+      "Bash(python3 -c \"import json; json.load\\(open\\('src/i18n/locales/en.json'\\)\\); print\\('OK en.json valid'\\)\")",
+      "Bash(cd /home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn && echo \"=== pt.json ===\"; grep -n '\"55\":\\\\|^  \"admin\":\\\\|\"myCourses\": {\\\\|\"phases\": {' src/i18n/locales/pt.json; echo \"=== fr.json ===\"; grep -n '\"55\":\\\\|^  \"admin\":\\\\|\"myCourses\": {\\\\|\"phases\": {' src/i18n/locales/fr.json)"
+    ],
+    "additionalDirectories": [
+      "/home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn/src/lib",
+      "/home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn/src/routes/_authenticated",
+      "/home/tales/Documents/SITES-PESOAL/SECURITY-ACADEMY/cyber-stride-learn/src/i18n/locales"
+    ]
+  }
+}

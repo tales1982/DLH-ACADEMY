@@ -1,0 +1,361 @@
+================================================================================
+            MEDDEFENSE HEALTH SYSTEMS
+            Controles de Segurança -- Artefatos de Origem
+            Compilado para: Avaliação de Postura de Segurança
+================================================================================
+
+========================================================================
+ARTEFATO 1: TRECHO DE CONFIGURAÇÃO DE FIREWALL (FortiGate 100F)
+========================================================================
+
+Fonte: Sarah Park (exportado do console de gerenciamento do FortiGate)
+Nota da Sarah: "Esta é uma exportação parcial. A config completa tem mais
+de 2000 linhas. Eu extraí as regras de política relevantes."
+
+config firewall policy
+
+    edit 1
+        set name "Allow-Web-Inbound"
+        set srcintf "wan1"
+        set dstintf "dmz"
+        set srcaddr "all"
+        set dstaddr "web-srv-01"
+        set action accept
+        set service "HTTP" "HTTPS"
+        set logtraffic all
+        set status enable
+    next
+
+    edit 2
+        set name "Allow-VPN-Westside"
+        set srcintf "vpn-westside"
+        set dstintf "internal"
+        set srcaddr "westside-subnet"
+        set dstaddr "server-subnet"
+        set action accept
+        set service "ALL"
+        set logtraffic utm
+        set status enable
+    next
+
+    edit 3
+        set name "Allow-VPN-HQ"
+        set srcintf "vpn-hq"
+        set dstintf "internal"
+        set srcaddr "hq-subnet"
+        set dstaddr "server-subnet"
+        set action accept
+        set service "ALL"
+        set logtraffic utm
+        set status enable
+    next
+
+    edit 4
+        set name "Allow-Internal-Outbound"
+        set srcintf "internal"
+        set dstintf "wan1"
+        set srcaddr "all"
+        set dstaddr "all"
+        set action accept
+        set service "ALL"
+        set nat enable
+        set logtraffic utm
+        set status enable
+    next
+
+    edit 5
+        set name "Deny-All"
+        set srcintf "any"
+        set dstintf "any"
+        set srcaddr "all"
+        set dstaddr "all"
+        set action deny
+        set logtraffic all
+        set status enable
+    next
+
+end
+
+Nota do Marcus (encontrada em suas anotações):
+"As regras 2 e 3 permitem TODOS os serviços vindos da VPN. Isso é
+permissivo demais. Se o roteador consumidor da Westside for
+comprometido, o atacante tem acesso total à subnet de servidores.
+Precisa ser restrito a portas específicas."
+
+"A regra 4 permite TODA saída. Não há filtragem de egress. O minerador
+de criptomoeda no billing-srv-01 está conversando tranquilamente com
+pools de mineração porque nada bloqueia tráfego de saída para portas
+arbitrárias."
+
+========================================================================
+ARTEFATO 2: CONFIGURAÇÃO SSH (/etc/ssh/sshd_config -- ehr-srv-01)
+========================================================================
+
+Fonte: Tom Reeves (Administrador de Sistemas), exportado via:
+cat /etc/ssh/sshd_config
+
+# Authentication
+PermitRootLogin no
+PubkeyAuthentication yes
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+UsePAM yes
+
+# Security
+MaxAuthTries 3
+LoginGraceTime 60
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+# Logging
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Other
+X11Forwarding no
+AllowTcpForwarding no
+Protocol 2
+
+Nota do Tom: "Isso é só o ehr-srv-01. O Marcus migrou esse aqui para
+autenticação somente por chave antes de sair. Os outros servidores
+Linux ainda estão com PasswordAuthentication configurado como 'yes'.
+Não tive tempo de mudar os outros."
+
+========================================================================
+ARTEFATO 3: POLÍTICA DE SENHAS (Documento Interno -- arquivo Word)
+========================================================================
+
+Fonte: Drive compartilhado do RH
+
+             MEDDEFENSE HEALTH SYSTEMS
+             Política de Segurança da Informação: Requisitos de Senha
+             Versão: 1.2 | Aprovado: [2 anos atrás] | Autor: Departamento de TI
+
+1. ESCOPO
+   Esta política se aplica a todos os funcionários, contratados e
+   fornecedores da MedDefense que acessam os sistemas de informação
+   da MedDefense.
+
+2. REQUISITOS DE SENHA
+   - Tamanho mínimo: 8 caracteres
+   - Complexidade: deve conter ao menos uma letra maiúscula, uma
+     minúscula, um número e um caractere especial
+   - Rotação: as senhas devem ser trocadas a cada 90 dias
+   - Histórico: o sistema lembra as últimas 5 senhas
+   - Bloqueio: contas são bloqueadas após 5 tentativas falhas, por 30 minutos
+
+3. CONTAS COMPARTILHADAS
+   Contas compartilhadas são desencorajadas, mas podem ser usadas quando
+   contas individuais não são tecnicamente viáveis. As senhas de contas
+   compartilhadas devem ser trocadas quando qualquer usuário com acesso
+   deixa a organização.
+
+4. AUTENTICAÇÃO MULTIFATOR
+   MFA é recomendado para acesso remoto, mas não é atualmente obrigatório.
+
+5. APLICAÇÃO
+   Os requisitos de senha são aplicados através de Group Policy do Active
+   Directory para sistemas Windows. Sistemas Linux são configurados
+   individualmente.
+
+   Aprovado por: Sarah Park, Diretora de TI
+   Última revisão: [18 meses atrás]
+
+========================================================================
+ARTEFATO 4: RELATÓRIO DE STATUS DO ANTIVÍRUS SOPHOS
+========================================================================
+
+Fonte: Sarah Park (exportado do console Sophos Central)
+
+Sophos Endpoint Protection -- Resumo de Implantação
+Gerado em: [Atual - 1 semana]
+
+COBERTURA:
+  Total de dispositivos gerenciados:      387
+  Dispositivos com assinaturas atuais:    341 (88,1%)
+  Dispositivos com assinaturas desatualizadas: 31 (8,0%)
+    - Última atualização há mais de 7 dias:  22
+    - Última atualização há mais de 30 dias:  9
+  Dispositivos sem reportar:                15 (3,9%)
+    - Offline há mais de 14 dias:              8
+    - Offline há mais de 30 dias:               7
+
+DISTRIBUIÇÃO POR PLATAFORMA:
+  Estações Windows 10/11:      372  (cobertas)
+  Servidores Windows:           15  (NÃO cobertos -- licença de
+                                     proteção de servidor não comprada)
+  Servidores Linux:              0  (NÃO cobertos -- não suportado
+                                     pelo nível atual do Sophos)
+  Dispositivos macOS:             0
+  Dispositivos móveis:            0  (sem MDM implantado)
+
+DETECÇÕES RECENTES (Últimos 30 dias):
+  Data         | Dispositivo         | Ameaça              | Ação
+  [20 dias]    | WS-RECEPT-01        | Adware.Generic      | Colocado em quarentena
+  [15 dias]    | WS-FIN-12           | PUA.CryptoMiner     | Bloqueado
+  [8 dias]     | WS-ADMIN-03         | Phish.URL           | Bloqueado
+  [3 dias]     | WS-NURSE-3F-07      | Trojan.GenericKD    | Colocado em quarentena
+
+OBSERVAÇÕES:
+  - Proteção de servidor foi solicitada pelo Marcus Webb há 4 meses.
+    Orçamento não foi aprovado.
+  - Os 15 dispositivos sem reportar incluem 7 que podem estar
+    desativados ou perdidos. A TI não reconciliou a lista de ativos.
+  - iPads usados por médicos não estão no escopo (sem solução MDM/EMM).
+
+========================================================================
+ARTEFATO 5: CONFIGURAÇÃO DE BACKUP
+========================================================================
+
+Fonte: Tom Reeves (Administrador de Sistemas)
+
+SISTEMA DE BACKUP: Veeam Backup & Replication (Community Edition)
+
+AGENDAMENTO:
+  Job: "Nightly-Full"
+  Frequência: Diariamente às 02:00
+  Tipo: Backup completo (todas as VMs no cluster VMware do Central)
+  Destino: NAS-01 (Synology DS1621+, 24TB RAID5)
+  Localização: NAS-01 fica na sala de servidores do Central, mesma fileira de rack
+  Retenção: 14 dias (backups antigos são apagados automaticamente)
+
+O QUE É FEITO BACKUP:
+  - ehr-srv-01 (aplicação EHR)
+  - ehr-db-01 (banco de dados do EHR)
+  - billing-srv-01 (faturamento)
+  - ad-dc-01 (controlador de domínio)
+  - file-srv-01 (compartilhamentos de arquivo)
+  - web-srv-01 (site/portal)
+
+O QUE NÃO É FEITO BACKUP:
+  - pacs-srv-01 (imagens PACS -- "grande demais, encheria o NAS")
+  - ad-dc-02 (DC secundário -- "redundante com o ad-dc-01")
+  - print-srv-01 ("ninguém pediu")
+  - Servidor da Westside Clinic (ws-srv-01) -- "fora do escopo"
+  - Configurações de dispositivos médicos
+  - Dados do O365 (e-mail, SharePoint, OneDrive) -- "a Microsoft cuida disso"
+
+TESTE DE RECUPERAÇÃO:
+  Último teste: [8 meses atrás] -- restauração parcial do file-srv-01
+  Resultado: "Bem-sucedido, mas levou 6 horas para um único servidor"
+  Teste completo de DR: Nunca realizado
+
+BACKUP OFFSITE/NUVEM:
+  Nenhum. O Marcus solicitou replicação de backup em nuvem para a AWS S3.
+  Cotação recebida: $14.400/ano. Orçamento negado pelo CFO.
+
+Nota do Tom: "O NAS está na mesma rede e na mesma sala que os
+servidores. Se perdermos a sala (incêndio, alagamento, ransomware que
+se espalha lateralmente), perdemos os dois. Eu sei que isso é um
+problema. O orçamento é o obstáculo."
+
+========================================================================
+ARTEFATO 6: CONTRATO DE SEGURANÇA FÍSICA (ClearView Security)
+========================================================================
+
+Fonte: Departamento Financeiro
+
+RESUMO DO CONTRATO DE SERVIÇO:
+
+Fornecedor: ClearView Security Services
+Período do contrato: [Anual, vigente]
+Local do serviço: MedDefense Central Hospital -- SOMENTE Entrada Principal
+
+Serviços fornecidos:
+  - 1 guarda de segurança uniformizado
+  - Horário: Segunda a sexta, 07:00 às 19:00
+  - Posição: Recepção da entrada principal, mesa de registro de visitantes
+  - Funções: Registro de visitantes, verificação de crachá, relato de incidentes
+  - O guarda NÃO faz ronda pelos andares, áreas restritas ou estacionamento
+
+NÃO incluído no contrato:
+  - Cobertura de fim de semana ou noturna
+  - Westside Clinic (sem segurança pessoal)
+  - Corporate HQ (segurança do prédio gerenciada pela Greenfield Bldg Mgmt)
+  - Monitoramento de câmeras (as câmeras existem, mas são
+    "automonitoradas" por quem estiver na recepção de segurança; as
+    gravações ficam num DVR local por 30 dias)
+
+SISTEMA DE CÂMERAS (das anotações do Tom Reeves):
+  MedDefense Central:
+    - 4 câmeras: entrada principal (2), entrada do PS (1), entrada da
+      garagem (1)
+    - Armazenamento no DVR: 30 dias, depois é sobrescrito
+    - Sem câmeras na área da sala de servidores, armários de rede ou
+      ala administrativa
+    - Câmeras são analógicas (não baseadas em IP), conectadas a um DVR
+      autônomo na recepção de segurança
+  Westside Clinic:
+    - 1 câmera: somente entrada principal
+    - Grava em cartão SD local. Capacidade: ~48 horas antes de sobrescrever.
+  Corporate HQ:
+    - Câmeras gerenciadas pelo prédio no lobby e no elevador. A
+      MedDefense não tem acesso às gravações.
+
+========================================================================
+ARTEFATO 7: REGISTROS DE TREINAMENTO (Departamento de RH)
+========================================================================
+
+Fonte: Drive compartilhado do RH -- Training_Log.xlsx (resumo)
+
+TREINAMENTO DE CONSCIENTIZAÇÃO EM SEGURANÇA:
+
+Programa: "CyberSafe Basics" (módulo online de terceiros, 45 minutos)
+Frequência: Anual (obrigatório para todos os funcionários)
+Última aplicação: [10 meses atrás]
+
+Taxas de conclusão:
+  Corporate HQ:         94% (207/220)
+  MedDefense Central:   71% (994/1400) -- equipe clínica teve baixa conclusão
+  Westside Clinic:      58% (104/180)
+
+Conteúdo abordado:
+  - Higiene de senhas
+  - Reconhecimento de e-mails de phishing
+  - Consciência de segurança física (tailgating, mesa limpa)
+  - Como reportar atividade suspeita
+
+Nenhuma campanha de simulação de phishing foi realizada.
+Nenhum treinamento específico por função (ex: para equipe de TI,
+executivos ou equipe clínica).
+Nenhum treinamento sobre como lidar digitalmente com dados de saúde
+protegidos (PHI).
+
+Nota do James Chen (em e-mail para o RH, 2 meses atrás):
+"58% de conclusão na Westside é inaceitável. Precisamos reforçar isso.
+Além disso, o conteúdo do treinamento é genérico -- não cobre cenários
+específicos de saúde, como manuseio de PHI ou segurança de
+dispositivos médicos."
+Resposta do RH: "Vamos incluir isso no próximo ciclo."
+
+========================================================================
+ARTEFATO 8: GESTÃO DE LOGS (do Tom Reeves, resumo verbal)
+========================================================================
+
+"O que fazemos com os logs? Bom...
+
+- O FortiGate guarda os próprios logs localmente. Retenção de 30 dias.
+  Não encaminhamos para lugar nenhum.
+- Servidores Windows enviam eventos para o Event Viewer. Verificamos
+  manualmente quando algo quebra.
+- Servidores Linux escrevem em /var/log. Syslog padrão. Sem centralização.
+- Logs do Apache no web-srv-01 e no billing-srv-01 giram semanalmente
+  via logrotate. Mantemos 4 semanas.
+- A aplicação de EHR tem seu próprio log de auditoria. O fornecedor
+  gerencia isso. Podemos solicitar exportações, mas leva 48 horas.
+- O Active Directory registra eventos críticos, mas não temos alertas.
+  Só olhamos os logs do AD quando algo quebra.
+
+O Marcus ficava falando de um SIEM. Uma coisa chamada 'Wazuh'. Ele
+começou a pesquisar mas nunca chegou a instalar nada. Acho que ele
+tinha umas anotações sobre isso em algum lugar."
+
+Não existe sistema centralizado de gestão de logs.
+Não existe alerta automatizado sobre eventos de segurança.
+Não existe proteção de integridade dos logs (sem hashing, sem
+armazenamento write-once).
+
+========================================================================
+                  FIM DOS ARTEFATOS DE CONTROLES
+========================================================================

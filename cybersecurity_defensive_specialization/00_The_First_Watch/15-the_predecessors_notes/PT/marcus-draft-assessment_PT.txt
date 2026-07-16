@@ -1,0 +1,265 @@
+================================================================================
+            MEDDEFENSE HEALTH SYSTEMS
+            Avaliação de Segurança -- RASCUNHO v0.3
+            Autor: Marcus Webb, Analista de Segurança
+            Data: [3 meses atrás]
+            Status: INCOMPLETO -- NÃO DISTRIBUIR
+================================================================================
+
+NOTA: Este documento foi encontrado num envelope lacrado na gaveta da mesa
+do analista de segurança anterior. Parece ser uma avaliação inacabada que
+nunca foi enviada ou compartilhada.
+
+========================================================================
+SEÇÃO 1: ACHADOS (Documentados)
+========================================================================
+
+ACHADO M-01: SEGMENTAÇÃO DE REDE -- CRÍTICO
+A rede da MedDefense é inteiramente plana. Todos os dispositivos, de
+estações clínicas a servidores a dispositivos médicos IoT, compartilham
+um único domínio de broadcast (10.10.0.0/16). Nenhuma VLAN está
+configurada. Não existem firewalls internos entre zonas. Um atacante que
+comprometa qualquer dispositivo único na rede consegue alcançar todos os
+outros dispositivos sem restrição.
+
+Este é o achado mais perigoso, sozinho. Ele amplifica toda outra
+vulnerabilidade. Uma estação comprometida consegue alcançar o banco de
+dados do EHR. Um monitor IoT comprometido consegue alcançar o controlador
+de domínio. O ransomware de janeiro no billing-srv-01 poderia ter se
+espalhado para todo sistema da organização. Não se espalhou, por pura
+sorte -- a variante de ransomware usada não se propagava pela rede. Da
+próxima vez, talvez não tenhamos a mesma sorte.
+
+Risco: CRÍTICO
+Recomendação: Implementar segmentação de rede com VLANs dedicadas para
+servidores, estações de trabalho, dispositivos médicos e convidados/IoT.
+Implantar regras de firewall interno entre os segmentos. Esforço
+estimado: 3-6 meses. Custo estimado: $25.000-40.000 (os switches já
+suportam VLANs, o custo é principalmente mão de obra e licenciamento do
+FortiGate para segmentação interna).
+
+------------------------------------------------------------------------
+
+ACHADO M-02: ISOLAMENTO DE BACKUP -- CRÍTICO
+O NAS de backup (NAS-01) está localizado na mesma sala de servidores e na
+mesma rede que os servidores de produção que ele faz backup. Não existe
+replicação offsite ou em nuvem. Num cenário de ransomware com capacidade
+de movimento lateral, tanto a produção quanto o backup seriam
+criptografados simultaneamente.
+
+A recuperação dependeria do rodízio mensal de fitas offsite, o que
+significa até 30 dias de perda de dados para a maioria dos sistemas.
+Para o EHR, isso é clinicamente inaceitável.
+
+Risco: CRÍTICO
+Recomendação: Implementar replicação de backup em nuvem (AWS S3 ou Azure
+Blob com armazenamento imutável). Custo: aproximadamente $14.400/ano com
+base na cotação recebida. Isso já foi negado uma vez. Escalar para o CEO.
+
+------------------------------------------------------------------------
+
+ACHADO M-03: EXPOSIÇÃO DE IOT MÉDICO -- ALTO
+Aproximadamente 200 dispositivos médicos conectados (monitores Philips,
+bombas BD Alaris, sistema de chamada de enfermagem, leitores de crachá)
+estão na mesma rede que estações de trabalho e servidores gerais. Esses
+dispositivos rodam firmware proprietário que raramente é atualizado e
+frequentemente contém vulnerabilidades conhecidas. Muitos têm interfaces
+de gerenciamento web acessíveis com credenciais padrão.
+
+As bombas de infusão BD Alaris (firmware 12.1.2) têm uma vulnerabilidade
+conhecida (boletim de segurança da BD) que o fabricante recomenda
+mitigar através de isolamento de rede. Isso não foi feito.
+
+Se um atacante alcançar esses dispositivos, as consequências vão além do
+roubo de dados. A manipulação de bombas de infusão poderia afetar a
+dosagem de medicamentos.
+
+Risco: ALTO (potencialmente CRÍTICO dadas as implicações de segurança do
+paciente)
+Recomendação: Isolar dispositivos médicos numa VLAN dedicada. Restringir
+acesso apenas a estações clínicas e ao servidor PACS. Bloquear todo
+acesso à internet para dispositivos médicos. Isso é parcialmente
+endereçado pelo Achado M-01, mas é destacado separadamente pela
+segurança do paciente.
+
+------------------------------------------------------------------------
+
+ACHADO M-04: AUSÊNCIA DE MONITORAMENTO E DETECÇÃO -- ALTO
+A MedDefense tem capacidade detectiva zero para eventos de segurança.
+Sem SIEM, sem IDS/IPS, sem centralização de logs, sem alerta automático.
+Eventos de segurança só são descobertos quando causam impacto
+operacional visível (ex: ransomware criptografando arquivos, degradação
+de performance de servidor).
+
+O minerador de criptomoeda do billing-srv-01 é um estudo de caso: o
+processo malicioso rodou por pelo menos 2 semanas antes de alguém
+perceber, e mesmo assim só por causa de reclamações de performance. Sem
+o impacto de performance, ele poderia ter rodado indefinidamente.
+
+Logs de firewall, logs de autenticação, logs de aplicação e logs de
+sistema existem todos, mas são armazenados localmente em cada
+dispositivo, sem coleta centralizada, sem política de retenção e sem
+processo de revisão.
+
+Risco: ALTO
+Recomendação: Implantar uma solução SIEM (Wazuh é open-source e capaz).
+Começar pelos servidores críticos e pelo firewall. Fase 2: estações de
+trabalho e dispositivos de rede. Esforço estimado: 2-4 semanas para
+implantação inicial.
+
+------------------------------------------------------------------------
+
+ACHADO M-05: SEM MFA EM NENHUM SISTEMA -- ALTO
+Autenticação multifator não está implantada em lugar nenhum do ambiente
+da MedDefense. Todo acesso, incluindo VPN, EHR, contas de administrador
+do Active Directory e o painel de administração do portal do paciente,
+depende apenas de usuário/senha.
+
+Dada a política de senha (8 caracteres, rotação de 90 dias), o
+comprometimento de credenciais é uma questão de quando, não de se.
+
+Risco: ALTO
+Recomendação: Implantar MFA na VPN primeiro (maior exposição), depois
+nas contas de administrador, depois no EHR. A Microsoft fornece MFA via
+Entra ID com as licenças O365 E3 já existentes. Custo: $0 adicional para
+VPN e admin. MFA no EHR exige suporte do fornecedor (MedTech
+Solutions) -- prazo desconhecido.
+
+------------------------------------------------------------------------
+
+ACHADO M-06: SEGURANÇA DA WESTSIDE CLINIC -- ALTO
+A Westside opera com um roteador de nível consumidor (Netgear
+Nighthawk), sem firewall, sem switches gerenciados, sem segurança física
+para o equipamento de TI, e um armário de servidores que não tranca. A
+VPN site-a-site roda no roteador consumidor, o que significa que a
+postura de segurança da Westside afeta diretamente a exposição de risco
+do Central.
+
+Risco: ALTO
+Recomendação: Substituir o roteador consumidor por um firewall gerenciado
+(FortiGate 60F ou similar, ~$1.500). Instalar uma fechadura no armário de
+servidores. Revisar as ACLs da VPN para restringir o acesso da Westside
+apenas aos recursos necessários.
+
+------------------------------------------------------------------------
+
+ACHADO M-07: CREDENCIAIS COMPARTILHADAS NA RADIOLOGIA -- MÉDIO
+O departamento de Radiologia usa uma conta compartilhada
+("raduser/radiology1") para acessar a estação PACS. Vários funcionários
+usam as mesmas credenciais. Isso elimina a responsabilização individual e
+torna impossível rastrear quem acessou quais dados de imagem de paciente.
+
+Reportei isso à Sarah Park. Ela disse que o departamento de Radiologia
+resistiu: "Precisamos de acesso rápido entre pacientes. Logins
+individuais são lentos demais." Sem resolução.
+
+Risco: MÉDIO (seria ALTO, exceto que o acesso ao PACS é limitado ao
+local)
+Recomendação: Implementar autenticação por cartão inteligente ou crachá
+de proximidade para as estações PACS. Login rápido sem credenciais
+compartilhadas.
+
+------------------------------------------------------------------------
+
+ACHADO M-08: SERVIDOR DE IMPRESSÃO FORA DE SUPORTE -- BAIXO
+O print-srv-01 roda Windows Server 2012 R2, que atingiu o fim do suporte
+em outubro de 2023. Ele não recebe mais atualizações de segurança.
+
+Realisticamente, o servidor de impressão é um alvo de baixo valor e só é
+acessível pela rede interna. O risco é mais sobre conformidade do que
+exploração ativa.
+
+Risco: BAIXO
+Recomendação: Migrar os serviços de impressão para um SO com suporte
+durante a próxima janela de manutenção. Prioridade baixa em relação aos
+outros achados.
+
+========================================================================
+SEÇÃO 2: ACHADOS (AINDA NÃO DOCUMENTADOS)
+========================================================================
+
+Coisas que identifiquei, mas fiquei sem tempo de escrever formalmente:
+
+- Certificado SSL do portal do paciente (web-srv-01): usando TLS 1.0
+  junto com o 1.2. O TLS 1.0 deveria ser desabilitado.
+
+- Nenhum controle de prevenção de perda de dados (DLP). Dados sensíveis
+  (prontuários de pacientes, dados financeiros) podem ser exfiltrados
+  via e-mail, USB ou upload para nuvem sem nenhuma detecção ou prevenção.
+
+- As portas USB estão irrestritas em todas as estações de trabalho.
+  Nenhuma GPO desabilitando armazenamento USB. Combinado com a ausência
+  de DLP, isso é um vetor significativo de exfiltração de dados.
+
+- O sistema de gestão predial da HQ é gerenciado pelo proprietário do
+  prédio. A MedDefense não tem visibilidade sobre a segurança de rede
+  dessa infraestrutura compartilhada. A VPN site-a-site termina em
+  qualquer coisa que o prédio forneça.
+
+- Não existe processo formal de gestão de mudanças. Alterações de
+  configuração em servidores e dispositivos de rede são feitas de forma
+  ad-hoc, sem documentação, teste ou aprovação. O cron job quebrado que
+  causou a lacuna de 3 semanas no backup foi uma mudança feita sem teste.
+
+========================================================================
+SEÇÃO 3: PRÓXIMOS PASSOS -- PANORAMA DE AMEAÇAS EXTERNAS
+========================================================================
+
+A avaliação de postura interna é metade da equação. A outra metade: quem
+está ativamente mirando organizações como a MedDefense?
+
+O setor de saúde está sob ataque sustentado. O setor reportou mais
+violações ao HHS em 2023 do que em qualquer ano anterior. Grupos de
+ransomware miram hospitais especificamente porque:
+  1. O cuidado ao paciente cria urgência para pagar (vidas em jogo)
+  2. Sistemas legados e dispositivos médicos criam pontos de entrada
+     fáceis
+  3. PHI tem alto valor no mercado negro ($250-1000 por registro)
+  4. Muitas organizações de saúde têm orçamentos de segurança fracos
+
+Comecei a acompanhar feeds de inteligência de ameaças e a construir um
+perfil de agente de ameaça para a MedDefense, mas fiquei sem tempo.
+
+Perguntas-chave para a próxima fase:
+
+- Quais categorias de agente de ameaça são mais relevantes para um grupo
+  hospitalar regional? (Estado-nação? Improvável. Grupos de
+  ransomware-as-a-service? Quase certamente. Insiders? Dado o problema
+  de credenciais compartilhadas, sim. Hacktivistas? Baixa probabilidade,
+  mas não nula.)
+
+- Quais são as TTPs típicas deles? O framework MITRE ATT&CK para saúde
+  deveria ser o ponto de partida. Mapear as técnicas de acesso inicial
+  mais comuns (T1190 Exploit Public-Facing Application, T1566 Phishing,
+  T1078 Valid Accounts) contra nossa exposição específica.
+
+- Como nossas lacunas específicas se conectam aos padrões de ataque
+  conhecidos deles? A rede plana (M-01) + sem MFA (M-05) + sem
+  monitoramento (M-04) é quase exatamente a combinação que permitiu o
+  ataque a [hospital redigido] no ano passado.
+
+- Conseguimos aplicar a modelagem de ameaças STRIDE à arquitetura da
+  MedDefense para antecipar onde os atacantes mirariam? O sistema EHR,
+  a VPN, o portal do paciente e os dispositivos médicos IoT são os
+  alvos óbvios de alto valor.
+
+Comecei a puxar dados dos avisos de saúde da CISA, dos boletins de
+ameaça do 405(d) do HHS e das notas de analista do HC3 (Health Sector
+Cybersecurity Coordination Center). Isso precisa virar um Relatório
+formal de Panorama de Ameaças. Meu substituto deveria assumir isso.
+
+Arquivos que comecei a coletar (no meu notebook -- preciso transferir
+para o drive compartilhado antes de sair):
+  - CISA Alert AA23-263A: Tendências de Ransomware em Saúde
+  - HC3 Threat Brief: Ransomware-as-a-Service mirando Saúde
+  - HHS 405(d) HICP: Principais Ameaças à Saúde
+  - Análise de Cobertura do Setor de Saúde no MITRE ATT&CK
+
+Não transferi esses arquivos. Provavelmente ainda estão no meu notebook,
+que a TI deveria ter no inventário de devolução de equipamento.
+
+========================================================================
+FIM DO RASCUNHO -- DOCUMENTO INCOMPLETO
+Marcus Webb
+[3 meses atrás]
+========================================================================

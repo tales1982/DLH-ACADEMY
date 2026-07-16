@@ -1,0 +1,679 @@
+<title>Conhecendo o Inimigo — Fundamentos de Inteligência de Ameaças</title>
+<meta name="description" content="Material de estudo em português: agentes de ameaça, vetores de ataque, engenharia social, STRIDE, MITRE ATT&CK, kill chains, correlação de gaps e estrutura de relatório executivo — cobrindo as 19 tarefas do projeto Know Your Enemy." />
+<style>
+  :root {
+    --bg: #f1efea;
+    --surface: #ffffff;
+    --surface-2: #e8e3da;
+    --ink: #201c19;
+    --ink-soft: #5a5249;
+    --ink-faint: #8a8175;
+    --line: #dcd5c9;
+    --accent: #a6472a;
+    --accent-ink: #7d3220;
+    --accent-soft: #f1ded5;
+    --risk-critical: #9b3a2e;
+    --risk-high: #b5701c;
+    --risk-medium: #93801c;
+    --risk-low: #3c7a4f;
+    --stamp: #7d3220;
+    --shadow: 0 1px 2px rgba(30, 22, 18, 0.08), 0 8px 24px -12px rgba(30, 22, 18, 0.22);
+
+    --font-body: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    --font-head: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Roboto Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171310;
+      --surface: #1e1915;
+      --surface-2: #26201a;
+      --ink: #ece5da;
+      --ink-soft: #b3a798;
+      --ink-faint: #83786a;
+      --line: #362e26;
+      --accent: #e08659;
+      --accent-ink: #f0ae8a;
+      --accent-soft: #3a2419;
+      --risk-critical: #e2695a;
+      --risk-high: #e0a24c;
+      --risk-medium: #cbbe5c;
+      --risk-low: #6fc496;
+      --stamp: #e08659;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px -12px rgba(0, 0, 0, 0.55);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171310; --surface: #1e1915; --surface-2: #26201a; --ink: #ece5da;
+    --ink-soft: #b3a798; --ink-faint: #83786a; --line: #362e26;
+    --accent: #e08659; --accent-ink: #f0ae8a; --accent-soft: #3a2419;
+    --risk-critical: #e2695a; --risk-high: #e0a24c; --risk-medium: #cbbe5c; --risk-low: #6fc496;
+    --stamp: #e08659;
+  }
+  :root[data-theme="light"] {
+    --bg: #f1efea; --surface: #ffffff; --surface-2: #e8e3da; --ink: #201c19;
+    --ink-soft: #5a5249; --ink-faint: #8a8175; --line: #dcd5c9;
+    --accent: #a6472a; --accent-ink: #7d3220; --accent-soft: #f1ded5;
+    --risk-critical: #9b3a2e; --risk-high: #b5701c; --risk-medium: #93801c; --risk-low: #3c7a4f;
+    --stamp: #7d3220;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 17px; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-ink); text-decoration-color: var(--line); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: currentColor; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  h1, h2, h3, h4 { font-family: var(--font-head); color: var(--ink); text-wrap: balance; line-height: 1.2; margin: 0; }
+  p { margin: 0 0 1em; max-width: 68ch; }
+  ul, ol { margin: 0 0 1em; padding-left: 1.3em; }
+  li { margin-bottom: 0.4em; max-width: 64ch; }
+  code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+
+  .eyebrow {
+    font-family: var(--font-head); text-transform: uppercase; letter-spacing: 0.12em;
+    font-size: 0.7rem; font-weight: 700; color: var(--accent-ink);
+  }
+  .skip-link { position: absolute; left: -999px; top: 0; background: var(--accent); color: #fff; padding: 0.6em 1em; z-index: 100; }
+  .skip-link:focus { left: 1em; top: 1em; }
+
+  .cover {
+    border-bottom: 3px double var(--line);
+    padding: clamp(2.5rem, 4vw, 4.5rem) clamp(1.25rem, 4vw, 3rem) clamp(2.5rem, 5vw, 4rem);
+    background: linear-gradient(180deg, var(--accent-soft) 0%, transparent 65%);
+    position: relative;
+  }
+  .cover-inner { max-width: 920px; margin: 0 auto; }
+  .classified-stamp {
+    display: inline-block; border: 2px solid var(--stamp); color: var(--stamp);
+    font-family: var(--font-head); font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase; font-size: 0.68rem; padding: 0.25em 0.6em;
+    transform: rotate(-3deg); border-radius: 3px; margin-bottom: 1em;
+  }
+  .cover h1 { font-size: clamp(2.1rem, 1.5rem + 2.4vw, 3.2rem); font-weight: 800; letter-spacing: -0.01em; max-width: 18ch; }
+  .cover .lede { font-family: var(--font-body); font-size: 1.15rem; color: var(--ink-soft); margin-top: 0.9em; max-width: 58ch; }
+  blockquote.pull {
+    margin: 1.8em 0 0; padding: 0.2em 0 0.2em 1.1em; border-left: 3px solid var(--accent);
+    font-family: var(--font-body); font-style: italic; font-size: 1.05rem; color: var(--ink); max-width: 58ch;
+  }
+  blockquote.pull cite { display: block; margin-top: 0.5em; font-style: normal; font-family: var(--font-head); font-size: 0.8rem; color: var(--ink-faint); letter-spacing: 0.02em; }
+
+  .theme-toggle {
+    position: fixed; top: 1rem; right: 1rem; z-index: 50; display: flex; align-items: center; gap: 0.4em;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+    padding: 0.35em 0.8em 0.35em 0.7em; font-family: var(--font-head); font-size: 0.75rem; color: var(--ink-soft);
+    cursor: pointer; box-shadow: var(--shadow);
+  }
+
+  .layout {
+    display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: clamp(1.5rem, 3vw, 3.5rem);
+    max-width: 1180px; margin: 0 auto; padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 4vw, 3rem) 5rem; align-items: start;
+  }
+  nav.toc { position: sticky; top: 1.5rem; max-height: calc(100vh - 3rem); overflow-y: auto; padding-right: 0.5rem; }
+  nav.toc .toc-title { font-family: var(--font-head); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); margin-bottom: 0.8em; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; }
+  nav.toc li { margin: 0; }
+  nav.toc a {
+    display: block; padding: 0.32em 0 0.32em 0.75em; border-left: 2px solid var(--line);
+    color: var(--ink-soft); font-family: var(--font-head); font-size: 0.84rem; text-decoration: none;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  nav.toc a:hover { color: var(--ink); border-left-color: var(--ink-faint); }
+  nav.toc a.active { color: var(--accent-ink); border-left-color: var(--accent); font-weight: 700; }
+  nav.toc .toc-sub a { padding-left: 1.5em; font-size: 0.79rem; }
+  nav.toc .toc-group { margin-top: 0.9em; }
+
+  main.content { min-width: 0; }
+  section { padding-top: 3.2rem; margin-top: -1.5rem; scroll-margin-top: 1.2rem; }
+  section:first-child { padding-top: 0; margin-top: 0; }
+  .section-head { margin-bottom: 1.4rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+  .section-head .eyebrow { margin-bottom: 0.5em; display: block; }
+  .section-head h2 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.05rem); font-weight: 800; }
+  .section-head .dek { color: var(--ink-soft); font-size: 1.02rem; margin-top: 0.6em; max-width: 60ch; }
+
+  h3.pillar-title { font-size: 1.25rem; font-weight: 800; margin-top: 2.4rem; margin-bottom: 0.2rem; display: flex; align-items: baseline; gap: 0.5em; }
+  h3.pillar-title .num { font-family: var(--font-mono); color: var(--accent-ink); font-size: 0.85rem; }
+  h4 { font-size: 1.02rem; font-weight: 700; margin-top: 1.4rem; margin-bottom: 0.4rem; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.1rem 1.25rem; box-shadow: var(--shadow); }
+  .example-box { background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 6px; padding: 0.85em 1.1em; margin: 0.9em 0 1.4em; font-size: 0.96rem; }
+  .example-box .label { font-family: var(--font-head); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent-ink); display: block; margin-bottom: 0.35em; }
+  .example-box p:last-child { margin-bottom: 0; }
+  .callout { background: var(--accent-soft); border-radius: 10px; padding: 1rem 1.3rem; margin: 1.2em 0; font-size: 0.96rem; }
+  .callout.warn { background: color-mix(in srgb, var(--risk-high) 16%, var(--surface)); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .case { border-left: 3px solid var(--ink-faint); padding-left: 1.2em; margin: 1.2em 0; }
+  .case p { color: var(--ink); }
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.4em 0; }
+  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; background: var(--surface); }
+  .stat .num { font-family: var(--font-head); font-weight: 800; font-size: 1.7rem; color: var(--accent-ink); display: block; }
+  .stat .cap { font-size: 0.83rem; color: var(--ink-soft); }
+
+  .table-wrap { overflow-x: auto; margin: 1em 0 1.6em; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 0.9rem; background: var(--surface); }
+  caption { text-align: left; caption-side: top; font-family: var(--font-head); font-size: 0.78rem; color: var(--ink-faint); padding: 0.6em 0.9em 0; }
+  th, td { text-align: left; padding: 0.65em 0.9em; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-family: var(--font-head); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); background: var(--surface-2); }
+  tbody th { font-family: var(--font-head); font-weight: 700; font-size: 0.86rem; white-space: nowrap; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+  td .fn { color: var(--ink-soft); }
+
+  .actor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.8rem; margin: 1em 0 1.6em; }
+  .actor-card { border: 1px solid var(--line); border-radius: 8px; padding: 1em 1.1em; background: var(--surface); border-top: 4px solid var(--tier-color); }
+  .actor-card h4 { margin: 0 0 0.3em; font-size: 0.95rem; }
+  .actor-card p { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 0.5em; }
+  .actor-card .ex { font-size: 0.8rem; font-family: var(--font-mono); color: var(--ink); }
+
+  .resource-group { margin-bottom: 2rem; }
+  .resource-group h4 { font-family: var(--font-head); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 0.8em; }
+  .resource-card { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 1.1rem 1.3rem; margin-bottom: 0.9rem; box-shadow: var(--shadow); }
+  .resource-card .rc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
+  .resource-card h5 { font-family: var(--font-head); font-size: 1rem; font-weight: 800; margin: 0; }
+  .badge { font-family: var(--font-head); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent-soft); padding: 0.22em 0.55em; border-radius: 999px; white-space: nowrap; }
+  .resource-card p { font-size: 0.93rem; margin: 0.5em 0; }
+  .resource-card .focus { font-size: 0.85rem; color: var(--ink-soft); }
+  .resource-card .focus b { color: var(--ink); font-weight: 700; }
+  .resource-card a.rc-link { font-family: var(--font-head); font-size: 0.82rem; font-weight: 700; }
+
+  .req-list { list-style: none; padding: 0; margin: 0 0 1.6em; }
+  .req-list li { display: flex; gap: 0.7em; padding: 0.55em 0; border-bottom: 1px dashed var(--line); max-width: none; font-size: 0.96rem; }
+  .req-list li::before { content: "—"; color: var(--accent-ink); flex-shrink: 0; }
+  .req-list li:last-child { border-bottom: none; }
+
+  .method-steps { list-style: none; counter-reset: step; padding: 0; margin: 1em 0 1.6em; }
+  .method-steps li { counter-increment: step; display: flex; gap: 0.9em; padding: 0.7em 0; border-bottom: 1px dashed var(--line); max-width: none; }
+  .method-steps li:last-child { border-bottom: none; }
+  .method-steps li::before {
+    content: counter(step); flex-shrink: 0; width: 1.6em; height: 1.6em; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent-ink); font-family: var(--font-head); font-weight: 800;
+    font-size: 0.78rem; display: flex; align-items: center; justify-content: center; margin-top: 0.15em;
+  }
+  .method-steps .step-body p { margin: 0 0 0.3em; max-width: none; }
+  .method-steps .step-body p:last-child { margin-bottom: 0; }
+  .method-steps .step-body strong { color: var(--ink); }
+
+  .task-tag { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); }
+
+  footer.page-footer { max-width: 1180px; margin: 0 auto; padding: 2rem clamp(1.25rem, 4vw, 3rem) 3rem; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 0.82rem; }
+  footer.page-footer a { color: var(--ink-faint); }
+  .back-to-top { display: inline-block; margin-top: 1.5rem; font-family: var(--font-head); font-size: 0.8rem; }
+
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; max-height: none; border-bottom: 1px solid var(--line); padding-bottom: 1.5rem; margin-bottom: 0.5rem; }
+  }
+</style>
+
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro/escuro">
+  <span id="themeIcon" aria-hidden="true">◐</span><span id="themeLabel">Tema</span>
+</button>
+
+<header class="cover">
+  <div class="cover-inner">
+    <span class="classified-stamp">Dossiê de Inteligência · Uso Interno</span>
+    <span class="eyebrow" style="display:block;">MedDefense Health Systems · Know Your Enemy · Material de Estudo (PT-BR)</span>
+    <h1>Conhecendo o Inimigo: Fundamentos de Inteligência de Ameaças</h1>
+    <p class="lede">Sua avaliação de postura respondeu o que a MedDefense tem e onde estão as lacunas. Essa é só metade do quadro. A outra metade: <strong>quem está do outro lado.</strong></p>
+    <blockquote class="pull">
+      "Se você conhece o inimigo e conhece a si mesmo, não precisa temer o resultado de cem batalhas. Se você se conhece mas não conhece o inimigo, para cada vitória ganha, sofrerá também uma derrota."
+      <cite>— Sun Tzu, A Arte da Guerra</cite>
+    </blockquote>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" id="toc" aria-label="Sumário">
+    <div class="toc-title">Sumário</div>
+    <ol>
+      <li><a href="#introducao">Introdução</a></li>
+      <li><a href="#importancia">Por que isso importa</a></li>
+      <li><a href="#contexto">O contexto: semana 2</a></li>
+      <li>
+        <a href="#objetivos">Objetivos de aprendizagem</a>
+        <ol class="toc-sub toc-group">
+          <li><a href="#agentes">1. Agentes e motivações</a></li>
+          <li><a href="#vetores">2. Vetores e superfície de ataque</a></li>
+          <li><a href="#modelagem">3. Modelagem e frameworks</a></li>
+          <li><a href="#comunicacao">4. Comunicação profissional</a></li>
+        </ol>
+      </li>
+      <li>
+        <a href="#metodos">Métodos: tarefas 6–18</a>
+        <ol class="toc-sub toc-group">
+          <li><a href="#referencias-fixas">1. Referências fixas</a></li>
+          <li><a href="#metodo-superficie">2. Mapear a superfície</a></li>
+          <li><a href="#metodo-matriz">3. Matriz vetor × ativo</a></li>
+          <li><a href="#metodo-killchain">4. Construir kill chains</a></li>
+          <li><a href="#metodo-correlacao">5. Correlacionar gap × ameaça</a></li>
+          <li><a href="#metodo-whatif">6. Cenários "e se...?"</a></li>
+          <li><a href="#metodo-relatorio">7. O relatório final</a></li>
+        </ol>
+      </li>
+      <li><a href="#fontes">Fontes e referências</a></li>
+      <li><a href="#requisitos">Requisitos do projeto</a></li>
+    </ol>
+  </nav>
+
+  <main class="content" id="conteudo">
+
+    <section id="introducao">
+      <div class="section-head">
+        <span class="eyebrow">Introdução</span>
+        <h2>Quem está do outro lado?</h2>
+      </div>
+      <p>O Relatório de Avaliação de Postura de Segurança contou pra MedDefense o que ela tem, o que a protege, e onde estão as lacunas. Isso é metade do quadro. A outra metade: quem está do outro lado?</p>
+      <div class="stat-row">
+        <div class="stat"><span class="num">89%</span><span class="cap">das organizações de saúde sofreram pelo menos um ciberataque nos últimos 12 meses, segundo o Ponemon Institute Healthcare Cybersecurity Report de 2024.</span></div>
+        <div class="stat"><span class="num">4 fatores</span><span class="cap">tornam a saúde o alvo estruturalmente perfeito: urgência de vida-ou-morte, dispositivos legados, valor do dado, e times de segurança cronicamente enxutos.</span></div>
+      </div>
+      <p>Mas "a saúde é visada" não é inteligência acionável. A pergunta que importa é: <strong>quem especificamente mira organizações como a MedDefense, por quê, como, e por quais portas?</strong></p>
+      <p>Um agente de estado-nação roubando pesquisa farmacêutica não opera nem remotamente como um afiliado de ransomware comprando credenciais num mercado da dark web. Uma atendente de faturamento insatisfeita exfiltrando prontuários tem um perfil de ataque completamente diferente de um adolescente oportunista escaneando por credenciais padrão. Cada um exige uma resposta defensiva diferente. Tratar todas as ameaças como iguais significa não se defender bem de nenhuma delas.</p>
+      <p>Este projeto vai te ensinar a pensar como o adversário — não para se tornar um, mas porque você não consegue construir uma defesa contra algo que não entende. Você vai perfilar os agentes que miram hospitais, mapear os vetores que eles usam, traçar os caminhos de ataque até a infraestrutura específica da MedDefense, e construir cenários de ameaça que se conectam diretamente às lacunas que você já identificou na sua avaliação de postura.</p>
+    </section>
+
+    <section id="importancia">
+      <div class="section-head">
+        <span class="eyebrow">Por que isso importa</span>
+        <h2>A diferença entre gastar certo e gastar errado</h2>
+      </div>
+      <p>Inteligência de ameaças não é exercício acadêmico. É a diferença entre gastar seu orçamento de segurança nas coisas certas e gastá-lo nas erradas. O Relatório de Panorama de Ameaças que você produz aqui vai moldar diretamente a avaliação de vulnerabilidades, a estratégia de defesa, e o planejamento de resposta a incidentes dos próximos projetos. Toda decisão defensiva que a MedDefense tomar daqui pra frente deveria ser informada pela pergunta: <em>"Que ameaça isso endereça, e o quão provável é essa ameaça?"</em></p>
+      <p>Todo analista de SOC que investiga um alerta precisa saber que tipo de atacante produziria aquele padrão. Todo respondente de incidente que contém uma violação precisa prever o próximo movimento do atacante. Todo arquiteto de segurança que desenha um controle precisa saber contra qual ataque ele foi desenhado.</p>
+      <div class="callout"><p>Os profissionais que são contratados são os que conseguem responder: "Dado o que sabemos sobre nossa organização e o panorama de ameaças, onde deveríamos focar?" Depois deste projeto, você será um deles.</p></div>
+    </section>
+
+    <section id="contexto">
+      <div class="section-head">
+        <span class="eyebrow">O cenário</span>
+        <h2>Semana 2 na MedDefense Health Systems</h2>
+      </div>
+      <div class="case">
+        <p>Sua Avaliação de Postura de Segurança pousou na mesa do Conselho na sexta passada. A reação foi exatamente o que o James Chen esperava: preocupação, mas não pânico. A CEO, Dra. Patricia Morales, ligou pro James diretamente depois. A pergunta dela foi direta: <em>"Agora entendemos nossas fraquezas. Mas contra quem somos fracos? Somos um alvo específico, ou só mais um hospital que poderia ser atingido por acidente?"</em></p>
+        <p>O James entra na sua sala na segunda de manhã carregando uma mochila de notebook. Ele coloca sobre sua mesa.</p>
+        <p><em>"Esse é o notebook do Marcus. A TI finalmente liberou e devolveu pra mim. Lembra das anotações dele sobre começar uma análise de panorama de ameaças? Os arquivos estão aqui. Avisos da CISA, boletins do HC3, alguns mapeamentos parciais do ATT&CK. Ele nunca terminou o trabalho, mas o material bruto está aqui."</em></p>
+        <p>Ele abre o notebook e mostra uma pasta: <code>C:\Users\marcus\Documents\Threat_Intel\</code></p>
+        <p>Dentro: seis arquivos, alguns anotados, alguns só PDFs baixados, um documento de análise pela metade que para no meio de uma frase.</p>
+        <p><em>"O Conselho quer duas coisas. Primeiro, quer saber quem ataca hospitais como o nosso e como. Segundo, quer saber como essas ameaças se conectam às lacunas específicas que identificamos semana passada. Se os grupos de ransomware que atingiram aqueles três hospitais regionais usam exploits de VPN como vetor primário, e nós temos um endpoint de VPN não corrigido, isso é uma conversa bem diferente de um slide genérico de 'ransomware é ruim'."</em></p>
+        <p><em>"Me construa um Relatório de Panorama de Ameaças. Faça específico pra MedDefense. Faça todo achado se conectar de volta à nossa avaliação de postura. E faça algo que o Conselho consiga usar pra tomar decisões, não só se preocupar."</em></p>
+      </div>
+    </section>
+
+    <section id="objetivos">
+      <div class="section-head">
+        <span class="eyebrow">Objetivos de aprendizagem</span>
+        <h2>As quatro competências deste projeto</h2>
+        <p class="dek">Ao final, você deve conseguir explicar cada um dos pontos abaixo a qualquer pessoa, sem ajuda do Google.</p>
+      </div>
+
+      <article id="agentes">
+        <h3 class="pillar-title"><span class="num">01</span> Agentes de ameaça e motivações</h3>
+
+        <h4>As seis categorias de agente de ameaça</h4>
+        <p>Todo agente pode ser classificado por três atributos ao mesmo tempo: se opera de <strong>dentro ou fora</strong> da organização, quanto <strong>recurso/financiamento</strong> tem, e qual seu nível de <strong>sofisticação</strong> técnica.</p>
+        <div class="actor-grid">
+          <div class="actor-card" style="--tier-color:var(--risk-critical)"><h4>Estado-Nação</h4><p>Recursos e sofisticação muito altos; permanência de meses a anos</p><span class="ex">espionagem, P&D farmacêutico</span></div>
+          <div class="actor-card" style="--tier-color:var(--risk-critical)"><h4>Crime Organizado</h4><p>Modelo de negócio profissional (RaaS); recursos médio-altos</p><span class="ex">ransomware, extorsão</span></div>
+          <div class="actor-card" style="--tier-color:var(--risk-medium)"><h4>Ameaça Interna</h4><p>Já tem acesso legítimo; sofisticação variável</p><span class="ex">negligente ou malicioso</span></div>
+          <div class="actor-card" style="--tier-color:var(--risk-low)"><h4>Hacktivista</h4><p>Recursos e sofisticação baixos-médios; motivação ideológica</p><span class="ex">defacement, DDoS</span></div>
+          <div class="actor-card" style="--tier-color:var(--risk-low)"><h4>Oportunista</h4><p>Recursos e sofisticação baixos; sem alvo específico</p><span class="ex">scanners automatizados</span></div>
+          <div class="actor-card" style="--tier-color:var(--risk-medium)"><h4>Shadow IT</h4><p>Não é bem um "atacante" — é uma fragilidade criada sem intenção maliciosa</p><span class="ex">dispositivo não gerenciado</span></div>
+        </div>
+
+        <h4>Por que a saúde é o alvo perfeito pro ransomware</h4>
+        <p>O modelo Ransomware-as-a-Service (RaaS) industrializou o crime: desenvolvedores constroem a ferramenta e ficam com 20-30% do resgate; afiliados executam a invasão e ficam com 70-80%; corretores de acesso inicial vendem pontos de entrada por $500-$10.000. Healthcare é classificada como alvo "Nível 1" porque a urgência clínica acelera o pagamento, o prontuário vale de $250 a $1.000 no mercado negro (contra $5-$50 de um cartão de crédito), os sistemas costumam ser legados, e a maioria tem seguro cibernético — ou seja, tem como pagar.</p>
+
+        <h4>Insider malicioso vs. negligente — e risco de cadeia de suprimentos</h4>
+        <p>Um insider malicioso sabe que está fazendo algo errado (roubo, sabotagem, curiosidade por celebridade). Um insider negligente está tentando resolver um problema real (lentidão, backlog) sem entender o risco que cria. Os dois são perigosos, mas exigem respostas diferentes: o malicioso precisa de detecção comportamental; o negligente precisa de processo e treinamento. Risco de cadeia de suprimentos é uma terceira categoria — exposição que a organização não controla diretamente, porque vem de um fornecedor ou parceiro.</p>
+      </article>
+
+      <article id="vetores">
+        <h3 class="pillar-title"><span class="num">02</span> Vetores de ameaça e superfície de ataque</h3>
+        <p>Vetores se dividem em taxonomia: baseados em mensagem, em arquivo, em rede, físicos, humanos, e de cadeia de suprimentos. O vetor humano é o mais explorado porque ataca psicologia, não tecnologia — o sistema que você não consegue corrigir com um patch.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>As principais técnicas de engenharia social (Sec+ 2.2)</caption>
+            <thead><tr><th>Técnica</th><th>Canal</th><th>Alavanca psicológica típica</th></tr></thead>
+            <tbody>
+              <tr><th>Phishing</th><td class="fn">E-mail</td><td>Urgência, autoridade</td></tr>
+              <tr><th>Vishing</th><td class="fn">Voz/telefone</td><td>Autoridade, urgência</td></tr>
+              <tr><th>Smishing</th><td class="fn">SMS</td><td>Urgência, medo</td></tr>
+              <tr><th>Pretexting</th><td class="fn">Cenário fabricado</td><td>Familiaridade, confiança</td></tr>
+              <tr><th>BEC (Business Email Compromise)</th><td class="fn">E-mail corporativo</td><td>Autoridade</td></tr>
+              <tr><th>Typosquatting</th><td class="fn">Domínio parecido</td><td>Descuido/familiaridade</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Decompor a superfície de ataque de uma organização significa olhar três dimensões ao mesmo tempo: <strong>externa</strong> (o que é visível da internet — VPN, portal, site), <strong>interna</strong> (o que fica exposto uma vez que alguém já entrou — rede plana, credenciais reutilizadas) e <strong>humana</strong> (quem pode ser enganado, e por quê). Traçar um vetor completo significa seguir o caminho do acesso inicial até o movimento lateral, até o objetivo final do atacante.</p>
+      </article>
+
+      <article id="modelagem">
+        <h3 class="pillar-title"><span class="num">03</span> Modelagem de ameaças e frameworks</h3>
+        <h4>STRIDE</h4>
+        <p>Criado pela Microsoft, o STRIDE decompõe ameaças em seis categorias, aplicadas a um diagrama de fluxo de dados do sistema: <strong>S</strong>poofing (falsificar identidade), <strong>T</strong>ampering (adulterar dado), <strong>R</strong>epudiation (negar uma ação), <strong>I</strong>nformation Disclosure (vazamento), <strong>D</strong>enial of Service (indisponibilidade), <strong>E</strong>levation of Privilege (escalação). Aplicar STRIDE a um sistema específico (como o EHR) significa passar por cada elemento do diagrama e perguntar: essa das seis coisas poderia acontecer aqui?</p>
+        <h4>MITRE ATT&CK</h4>
+        <p>É a matriz definitiva de comportamento de atacante: táticas (o objetivo, tipo "Acesso Inicial" ou "Movimento Lateral") nas colunas, técnicas específicas (como alcançar aquele objetivo) nas linhas. Mapear os passos de um ataque contra o ATT&CK transforma uma narrativa solta ("o atacante entrou e se espalhou") numa sequência formal e comparável com outros ataques reais.</p>
+        <h4>Kill chain</h4>
+        <p>Uma kill chain mostra a sequência completa de um ataque, do ponto de entrada até o impacto final — é o "roteiro" que junta táticas do ATT&CK numa linha do tempo específica pra um cenário. Correlacionar sua própria análise interna de lacunas com o panorama de ameaças externo é o que recalibra prioridades: uma lacuna que parecia menor pode virar crítica quando você descobre que é exatamente o vetor favorito do agente que mais provavelmente vai te atacar.</p>
+      </article>
+
+      <article id="comunicacao">
+        <h3 class="pillar-title"><span class="num">04</span> Comunicação profissional</h3>
+        <p>Um Relatório de Panorama de Ameaças só tem valor se for específico, baseado em evidência, e acionável. A mesma regra de ouro do projeto anterior se aplica aqui, só que virada pra fora:</p>
+        <div class="example-box">
+          <span class="label">Genérico vale zero</span>
+          <p style="color:var(--risk-critical)"><strong>Fraco:</strong> "Ransomware é uma ameaça pra hospitais."</p>
+          <p style="color:var(--risk-low)"><strong>Forte:</strong> "Grupos de ransomware usando cadeias de exploit de VPN mirariam o FortiGate não corrigido da MedDefense, atravessariam a rede plana até o ehr-srv-01, e criptografariam o banco de dados do EHR, afetando 50.000 prontuários de pacientes."</p>
+        </div>
+        <p>Comunicar inteligência de ameaças pra quem não é técnico significa traduzir "vetor de ataque" e "sofisticação" em termos de negócio: probabilidade, impacto financeiro, e o que fazer primeiro — exatamente como você já praticou no Briefing do CISO do projeto anterior.</p>
+      </article>
+    </section>
+
+    <section id="metodos">
+      <div class="section-head">
+        <span class="eyebrow">Métodos para as Tarefas 6–18</span>
+        <h2>Do perfil de ameaça ao relatório executivo</h2>
+        <p class="dek">As Tarefas 0–5 te ensinaram a perfilar agentes e vetores isoladamente. A partir da Tarefa 6, o projeto muda de natureza: você passa a <strong>cruzar, correlacionar e sintetizar</strong> tudo isso em referências únicas, matrizes, cadeias de ataque e, por fim, um relatório executivo. Esta seção cobre o vocabulário fixo e os métodos de raciocínio que essas tarefas assumem que você já domina.</p>
+      </div>
+
+      <article id="referencias-fixas">
+        <h3 class="pillar-title"><span class="num">01</span> Referências fixas que você vai reusar o tempo todo</h3>
+        <p>Três listas fechadas aparecem repetidamente nas Tarefas 6 a 18. Vale ter as três à mão, não decoradas de memória — você vai consultá-las constantemente.</p>
+
+        <h4>A tríade CIA <span class="task-tag">— usada nas Tarefas 10, 11, 12, 14</span></h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Pilar</th><th>O que protege</th><th>Exemplo na MedDefense</th></tr></thead>
+            <tbody>
+              <tr><th>Confidencialidade</th><td>Que o dado só seja visto por quem tem permissão</td><td>Um prontuário vazando pra fora da organização</td></tr>
+              <tr><th>Integridade</th><td>Que o dado não seja alterado sem autorização</td><td>Uma dosagem de prescrição sendo adulterada no EHR</td></tr>
+              <tr><th>Disponibilidade</th><td>Que o sistema esteja acessível quando precisa estar</td><td>O EHR ficando fora do ar durante um atendimento de emergência</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Toda vez que uma tarefa pede "impacto" ou "CIA pillars", ela quer que você diga <em>qual</em> desses três (pode ser mais de um) é afetado e <em>como</em> — não basta dizer "afeta a segurança".</p>
+
+        <h4>As motivações do Sec+ 2.1 <span class="task-tag">— usada na Tarefa 14</span></h4>
+        <p>Quando uma tarefa pede a motivação de um ator, escolha de uma lista fechada, não invente livremente: <strong>ganho financeiro</strong>, <strong>espionagem</strong>, <strong>ativismo político/social</strong>, <strong>vingança</strong>, <strong>guerra/desestabilização</strong>, <strong>notoriedade</strong>, <strong>diversão/curiosidade</strong>. Ransomware é quase sempre ganho financeiro; um estado-nação é quase sempre espionagem; um hacktivista é quase sempre ativismo. Insiders variam — dependem do perfil específico que você escolheu na Tarefa 3.</p>
+
+        <h4>As 14 táticas do MITRE ATT&CK, em ordem <span class="task-tag">— usada nas Tarefas 13 e 14</span></h4>
+        <p>Essa é a lista mais importante do projeto a partir daqui. As 14 táticas seguem (aproximadamente) a ordem em que um ataque real progride — não é uma lista alfabética. Memorize a ordem, não decore as definições: ela funciona como um checklist mental pra classificar qualquer passo de uma narrativa de ataque.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>As 14 táticas Enterprise do ATT&CK, na ordem típica de um ataque</caption>
+            <thead><tr><th>#</th><th>Tática</th><th>O atacante está tentando...</th></tr></thead>
+            <tbody>
+              <tr><th>1</th><td class="fn">Reconnaissance</td><td>Coletar informação sobre o alvo antes de agir</td></tr>
+              <tr><th>2</th><td class="fn">Resource Development</td><td>Preparar infraestrutura ou capacidades pro ataque (comprar acesso, registrar domínio)</td></tr>
+              <tr><th>3</th><td class="fn">Initial Access</td><td>Conseguir o primeiro ponto de entrada no ambiente</td></tr>
+              <tr><th>4</th><td class="fn">Execution</td><td>Rodar código malicioso no sistema da vítima</td></tr>
+              <tr><th>5</th><td class="fn">Persistence</td><td>Garantir que o acesso sobrevive a reinícios/logoffs</td></tr>
+              <tr><th>6</th><td class="fn">Privilege Escalation</td><td>Obter permissões mais altas do que as iniciais</td></tr>
+              <tr><th>7</th><td class="fn">Defense Evasion</td><td>Evitar ser detectado ou removido</td></tr>
+              <tr><th>8</th><td class="fn">Credential Access</td><td>Roubar nomes de usuário e senhas/hashes</td></tr>
+              <tr><th>9</th><td class="fn">Discovery</td><td>Mapear o ambiente a partir de dentro (rede, contas, sistemas)</td></tr>
+              <tr><th>10</th><td class="fn">Lateral Movement</td><td>Se mover de um sistema pra outro dentro do ambiente</td></tr>
+              <tr><th>11</th><td class="fn">Collection</td><td>Reunir o dado de interesse num único lugar</td></tr>
+              <tr><th>12</th><td class="fn">Command and Control</td><td>Manter comunicação remota com a infraestrutura do atacante</td></tr>
+              <tr><th>13</th><td class="fn">Exfiltration</td><td>Tirar o dado de dentro do ambiente da vítima</td></tr>
+              <tr><th>14</th><td class="fn">Impact</td><td>Causar o dano final: criptografar, destruir, interromper</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <p>Repare que <strong>Discovery</strong> (mapear o ambiente) e <strong>Lateral Movement</strong> (se mover pra outro sistema) são táticas diferentes, mesmo parecendo a mesma coisa — rodar <code>arp -a</code> num único computador é Discovery; efetivamente acessar um segundo computador é Lateral Movement. Essa distinção aparece com frequência nas narrativas de ataque.</p>
+        </div>
+      </article>
+
+      <article id="metodo-superficie">
+        <h3 class="pillar-title"><span class="num">02</span> Como mapear uma superfície de ataque</h3>
+        <p><span class="task-tag">Tarefa 7</span> — Uma superfície de ataque não é uma lista de vulnerabilidades, é uma lista de <strong>pontos de contato possíveis</strong>, organizados em três camadas que respondem perguntas diferentes:</p>
+        <ol class="method-steps">
+          <li class="step-body"><p><strong>Externa</strong> — o que qualquer pessoa na internet consegue tentar tocar, sem nenhum acesso prévio? (portais, VPN, e-mail, DNS, site público)</p></li>
+          <li class="step-body"><p><strong>Interna</strong> — o que fica exposto assim que alguém já está dentro da rede, por qualquer meio? Numa rede plana (sem segmentação), essa camada tende a ser enorme, porque um único ponto de entrada expõe tudo.</p></li>
+          <li class="step-body"><p><strong>Humana</strong> — quem, por cargo e nível de acesso, pode ser enganado ou coagido a dar acesso que não deveria dar?</p></li>
+        </ol>
+        <p>Pra cada ponto de entrada nas três camadas, a pergunta fixa é sempre a mesma: <em>o que existe aqui, o que protege isso hoje, e o que falta pra proteger de verdade (o gap)?</em></p>
+      </article>
+
+      <article id="metodo-matriz">
+        <h3 class="pillar-title"><span class="num">03</span> Como cruzar vetor com ativo</h3>
+        <p><span class="task-tag">Tarefa 9</span> — Uma matriz vetor × ativo responde: "esse método de ataque específico consegue, de alguma forma, chegar nesse ativo específico?" Cada célula preenchida não é uma palavra, é uma frase de <strong>caminho</strong>, encadeando elos:</p>
+        <div class="example-box">
+          <span class="label">Formato de uma célula preenchida</span>
+          <p>[Vetor] → [o que o atacante ganha primeiro] → [como isso se propaga pelo ambiente] → [o ponto técnico que permite a propagação] → [o ativo/dado final atingido]</p>
+        </div>
+        <p>Células vazias são esperadas e corretas quando não existe um caminho plausível, mesmo indireto. O valor da matriz não está em preencher tudo — está em revelar, por contagem, quais ativos são alcançados por mais vetores diferentes (os mais conectados) e quais vetores alcançam mais ativos diferentes (os mais versáteis).</p>
+      </article>
+
+      <article id="metodo-killchain">
+        <h3 class="pillar-title"><span class="num">04</span> Como construir uma kill chain com pontos de ruptura</h3>
+        <p><span class="task-tag">Tarefa 10</span> — Uma kill chain expande um único caminho da matriz vetor × ativo numa sequência de 5 papéis fixos:</p>
+        <ol class="method-steps">
+          <li class="step-body"><p><strong>Acesso Inicial</strong> — como o atacante entra pela primeira vez.</p></li>
+          <li class="step-body"><p><strong>Estabelecer Ponto de Apoio</strong> — como ele garante que não vai perder esse acesso (persistência), não é ainda sobre avançar.</p></li>
+          <li class="step-body"><p><strong>Movimento Lateral / Escalada</strong> — como ele se move do ponto de entrada até perto do alvo real.</p></li>
+          <li class="step-body"><p><strong>Execução do Objetivo</strong> — o que ele faz ao chegar no alvo.</p></li>
+          <li class="step-body"><p><strong>Impacto</strong> — a consequência de negócio (clínica, financeira, regulatória, reputacional) e qual pilar da CIA é afetado.</p></li>
+        </ol>
+        <div class="callout">
+          <p><strong>Pontos de ruptura</strong> é o conceito mais importante da tarefa: em qual desses 5 passos um controle (existente ou ausente) poderia ter interrompido a cadeia inteira? Esse é o argumento central de defesa em profundidade — quebrar a cadeia em qualquer ponto impede o impacto final, mesmo sem bloquear o passo anterior.</p>
+        </div>
+      </article>
+
+      <article id="metodo-correlacao">
+        <h3 class="pillar-title"><span class="num">05</span> Como correlacionar gap com ameaça</h3>
+        <p><span class="task-tag">Tarefas 15 e 16</span> — Sua Análise de Lacunas do 1x00 classificou risco olhando só pra dentro (criticidade do ativo, exposição, controle ausente). Agora você adiciona a outra metade: <strong>quem exploraria esse gap, e por quantos caminhos diferentes.</strong></p>
+        <p>A regra prática de recalibração: um gap sem nenhum ator, kill chain ou cenário associado tende a permanecer no mesmo nível (ou até cair em prioridade). Um gap que aparece em múltiplas kill chains <em>e</em> múltiplos cenários quase sempre sobe de nível — a frequência de aparição é o sinal, não a intuição.</p>
+        <p>Priorização final (Tarefa 16) combina dois eixos separadamente antes de juntar num veredito único:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Eixo</th><th>Pergunta</th></tr></thead>
+            <tbody>
+              <tr><th>Probabilidade</th><td>Isso realmente aconteceria? Há dado de setor e/ou evidência específica da MedDefense (ex: o ataque de janeiro) sustentando isso?</td></tr>
+              <tr><th>Impacto</th><td>Se acontecesse, qual o tamanho do dano — usando a criticidade de ativo já definida no 1x00?</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Só depois de decidir os dois separadamente é que você combina numa Prioridade Geral — probabilidade alta com impacto crítico não é automaticamente igual a probabilidade crítica com impacto médio; pese os dois no contexto específico da MedDefense.</p>
+      </article>
+
+      <article id="metodo-whatif">
+        <h3 class="pillar-title"><span class="num">06</span> Como analisar um cenário "e se...?"</h3>
+        <p><span class="task-tag">Tarefa 17</span> — Diferente das tarefas anteriores, aqui você projeta o futuro: uma mudança de negócio hipotética se propaga por todo o modelo de ameaça que você já construiu. O raciocínio segue sempre a mesma cadeia:</p>
+        <ol class="method-steps">
+          <li class="step-body"><p>O que essa mudança adicionaria ao Registro de Ativos? (novo sistema, novo dado, novo terceiro com acesso)</p></li>
+          <li class="step-body"><p>Isso atrai um <strong>novo tipo de ator</strong> que hoje não teria motivo de mirar a MedDefense?</p></li>
+          <li class="step-body"><p>Quais vetores ficam <strong>mais ou menos relevantes</strong> — a mudança fecha alguma porta antiga e abre uma nova?</p></li>
+          <li class="step-body"><p>O Top 5 de ameaças (Tarefa 16) muda de ordem por causa disso?</p></li>
+          <li class="step-body"><p>Surge algum <strong>gap novo</strong> que não existia antes da mudança?</p></li>
+        </ol>
+        <p>Feche sempre com um veredito de uma frase: a exposição total aumenta, diminui, ou só <em>muda de forma</em> (mesmo risco, redistribuído em outro lugar)?</p>
+      </article>
+
+      <article id="metodo-relatorio">
+        <h3 class="pillar-title"><span class="num">07</span> Como estruturar o relatório executivo final</h3>
+        <p><span class="task-tag">Tarefa 18</span> — O Relatório de Panorama de Ameaças não cria conteúdo novo: ele <strong>compila e sintetiza</strong> as Tarefas 0 a 17 num único documento autocontido. Duas regras guiam a montagem:</p>
+        <div class="example-box">
+          <span class="label">Bottom line up front</span>
+          <p>Escreva o Resumo Executivo <strong>por último</strong>, mesmo aparecendo primeiro no documento — só depois de fechar as outras 9 seções você sabe de fato qual é a ameaça mais perigosa e quais são as 3 recomendações principais.</p>
+        </div>
+        <div class="example-box">
+          <span class="label">Autocontido</span>
+          <p>Um leitor que nunca viu suas 18 tarefas precisa entender as conclusões. Isso significa nomear ativos, atores e gaps por extenso na primeira menção de cada seção, mesmo repetindo informação entre seções.</p>
+        </div>
+        <p>Todo achado do relatório deveria remontar a uma tarefa específica — tenha uma lista mental de qual seção puxa de qual tarefa (ex: Superfície de Ataque puxa das Tarefas 7, 8, 9; Recomendações Priorizadas puxa das Tarefas 16 e 17) antes de escrever, pra não esquecer nenhuma peça nem inventar conteúdo que não foi analisado antes.</p>
+      </article>
+    </section>
+
+    <section id="fontes">
+      <div class="section-head">
+        <span class="eyebrow">Recursos</span>
+        <h2>Fontes e referências citadas</h2>
+        <p class="dek">As nove fontes abaixo são a base oficial do projeto. Este material resume o essencial de cada uma; a leitura da fonte primária continua sendo necessária.</p>
+      </div>
+
+      <div class="resource-group">
+        <h4>Agentes de ameaça e inteligência</h4>
+        <div class="resource-card">
+          <div class="rc-head"><h5>CISA — Understanding Threat Actors</h5><span class="badge">CISA</span></div>
+          <p>Os avisos da CISA documentam táticas, técnicas e procedimentos (TTPs) de agentes de ameaça específicos — desde grupos de ransomware nomeados (como o aviso "Understanding Ransomware Threat Actors: LockBit") até campanhas de estado-nação. Navegar pelas categorias de aviso é a forma mais direta de ver como um perfil de agente real é documentado.</p>
+          <p class="focus"><b>Leitura indicada:</b> navegue as categorias de aviso pra entender o panorama.</p>
+          <a class="rc-link" href="https://www.cisa.gov/topics/cyber-threats-and-advisories" target="_blank" rel="noopener">Ver recurso oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>HC3 — Health Sector Cybersecurity Coordination Center</h5><span class="badge">HHS</span></div>
+          <p>A fonte primária de inteligência de ameaças específica da saúde nos EUA. Produz Analyst Notes (informação rápida sobre uma ameaça específica), White Papers (análise aprofundada), Threat Briefs e Sector Alerts — cobrindo desde grupos de ransomware nomeados (Akira, BlackSuit) até vulnerabilidades específicas de dispositivo médico.</p>
+          <p class="focus"><b>Leitura indicada:</b> 2 notas de analista recentes, à sua escolha.</p>
+          <a class="rc-link" href="https://www.hhs.gov/about/agencies/asa/ocio/hc3/index.html" target="_blank" rel="noopener">Ver recurso oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>ENISA Threat Landscape Report (edição mais recente)</h5><span class="badge">ENISA</span></div>
+          <p>O panorama anual de ameaças da União Europeia — a edição mais recente analisa milhares de incidentes reais de um período de 12 meses, apontando phishing (incluindo vishing) como o vetor líder, respondendo por cerca de 60% dos casos observados. A metodologia é pública e vale entender como o relatório é construído, não só o resultado final.</p>
+          <p class="focus"><b>Leitura indicada:</b> Sumário Executivo, pra entender a metodologia.</p>
+          <a class="rc-link" href="https://www.enisa.europa.eu/topics/cyber-threats/threat-landscape" target="_blank" rel="noopener">Ver recurso oficial →</a>
+        </div>
+      </div>
+
+      <div class="resource-group">
+        <h4>Vetores de ataque e engenharia social</h4>
+        <div class="resource-card">
+          <div class="rc-head"><h5>NIST SP 800-61 Rev. 2 — Computer Security Incident Handling Guide</h5><span class="badge">NIST</span></div>
+          <p>O guia clássico de tratamento de incidentes, com um capítulo dedicado a vetores de ataque e indicadores de comprometimento — a base pra reconhecer que tipo de evidência aponta pra qual tipo de vetor. Foi formalmente substituído pela Revisão 3 (integrada ao NIST CSF 2.0), mas a Rev. 2 continua sendo referência amplamente usada.</p>
+          <p class="focus"><b>Leitura indicada:</b> Capítulo 3 — vetores de ataque e indicadores.</p>
+          <a class="rc-link" href="https://csrc.nist.gov/pubs/sp/800/61/r2/final" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>KnowBe4 — Social Engineering Red Flags</h5><span class="badge">KnowBe4</span></div>
+          <p>Um guia prático com sinais concretos de que um e-mail, ligação ou mensagem é engenharia social — de erros gramaticais e domínios parecidos (typosquatting) até o gatilho mais comum de todos: qualquer contato pedindo sua senha. A lógica dos "stressor events" (eventos que forçam reação emocional imediata) explica por que urgência é a alavanca psicológica mais usada.</p>
+          <p class="focus"><b>Leitura indicada:</b> guia prático de identificação de red flags.</p>
+          <a class="rc-link" href="https://blog.knowbe4.com/red-flags-warn-of-social-engineering" target="_blank" rel="noopener">Ver recurso oficial →</a>
+        </div>
+      </div>
+
+      <div class="resource-group">
+        <h4>Modelagem de ameaças</h4>
+        <div class="resource-card">
+          <div class="rc-head"><h5>Microsoft — STRIDE Threat Model</h5><span class="badge">Microsoft</span></div>
+          <p>A metodologia STRIDE explicada com exemplos práticos: as seis categorias (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege) aplicadas sobre um diagrama de fluxo de dados. Traz discussões de segurança pra dentro da revisão de arquitetura, onde falhas de design são mais baratas de corrigir do que depois do deploy.</p>
+          <p class="focus"><b>Leitura indicada:</b> metodologia STRIDE explicada, com exemplos.</p>
+          <a class="rc-link" href="https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats" target="_blank" rel="noopener">Ver recurso oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>MITRE ATT&CK Enterprise Matrix</h5><span class="badge">MITRE</span></div>
+          <p>O framework definitivo de comportamento de atacante: 14 táticas (objetivos, como "Initial Access" ou "Lateral Movement") cada uma com múltiplas técnicas e sub-técnicas documentadas a partir de ataques reais observados. Navegue primeiro pelo nível de táticas, depois explore as técnicas de Acesso Inicial e Movimento Lateral especificamente.</p>
+          <p class="focus"><b>Leitura indicada:</b> nível de táticas primeiro, depois Acesso Inicial e Movimento Lateral.</p>
+          <a class="rc-link" href="https://attack.mitre.org/matrices/enterprise/" target="_blank" rel="noopener">Ver recurso oficial →</a>
+        </div>
+      </div>
+
+      <div class="resource-group">
+        <h4>Ameaças específicas de saúde</h4>
+        <div class="resource-card">
+          <div class="rc-head"><h5>HHS 405(d) — Health Industry Cybersecurity Practices (HICP)</h5><span class="badge">HHS</span></div>
+          <p>Já usado no projeto anterior — aqui o foco é especificamente a seção de "5 Ameaças Atuais", que mapeia diretamente contra as categorias de agente que você está classificando neste projeto.</p>
+          <p class="focus"><b>Leitura indicada:</b> seção "5 Current Threats".</p>
+          <a class="rc-link" href="https://405d.hhs.gov/cornerstone/hicp" target="_blank" rel="noopener">Ler publicação oficial →</a>
+        </div>
+        <div class="resource-card">
+          <div class="rc-head"><h5>CISA — Healthcare and Public Health Sector</h5><span class="badge">CISA</span></div>
+          <p>Orientação e alertas específicos do setor de saúde como infraestrutura crítica — o mesmo setor que, segundo o próprio dossiê deste projeto, foi o mais visado por ransomware entre os 16 setores críticos em 2023 e 2024.</p>
+          <p class="focus"><b>Leitura indicada:</b> orientação e alertas específicos do setor.</p>
+          <a class="rc-link" href="https://www.cisa.gov/stopransomware/healthcare-and-public-health-sector" target="_blank" rel="noopener">Ver recurso oficial →</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="requisitos">
+      <div class="section-head">
+        <span class="eyebrow">Requisitos</span>
+        <h2>Requisitos do projeto</h2>
+      </div>
+
+      <div class="callout warn">
+        <p>⚠ Este material está em português apenas para apoiar seu estudo. Os entregáveis reais do projeto precisam ser escritos em inglês profissional, conforme o requisito geral abaixo.</p>
+      </div>
+
+      <h4>Geral</h4>
+      <ul class="req-list">
+        <li>Todos os entregáveis devem ser escritos em inglês profissional.</li>
+        <li>Um arquivo <code>README.md</code>, na raiz da pasta do projeto, é obrigatório.</li>
+        <li>Todos os seus arquivos devem terminar com uma nova linha.</li>
+      </ul>
+
+      <h4>Regras específicas do projeto</h4>
+      <ul class="req-list">
+        <li>Não é necessário ambiente de laboratório. Este projeto é baseado em artefatos e é analítico.</li>
+        <li>Cruze referências com seus entregáveis do 1x00. Seu Registro de Ativos, Matriz de Criticidade, Análise de Lacunas e Mapa de Dados são insumos deste projeto. Referencie-os pelo nome e conteúdo — um relatório de panorama de ameaças desconectado da avaliação de postura não serve pra nada.</li>
+        <li>Tom profissional é obrigatório — mesmo padrão do Projeto 1x00.</li>
+        <li>Especificidade em vez de generalidade. "Ransomware é uma ameaça pra hospitais" vale zero.</li>
+        <li>Cite seu raciocínio. Ao avaliar probabilidade ou priorizar uma ameaça, explique qual evidência sustenta esse julgamento — estatísticas do setor, lacunas específicas da MedDefense, e padrões de comportamento de agente de ameaça são todas evidências válidas.</li>
+      </ul>
+
+      <a class="back-to-top" href="#introducao">↑ Voltar ao início</a>
+    </section>
+
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p>Material de estudo preparado a partir do enunciado oficial do Projeto "Know Your Enemy" (MedDefense Health Systems), cobrindo as 19 tarefas (0–18), e das fontes referenciadas na seção Recursos. Não substitui a leitura das fontes primárias. Última atualização: 16 de julho de 2026.</p>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var toggle = document.getElementById('themeToggle');
+    var icon = document.getElementById('themeIcon');
+    var label = document.getElementById('themeLabel');
+
+    function applyTheme(theme) {
+      if (theme) { root.setAttribute('data-theme', theme); }
+      else { root.removeAttribute('data-theme'); }
+      var isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      icon.textContent = isDark ? '◑' : '◐';
+      label.textContent = isDark ? 'Escuro' : 'Claro';
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    applyTheme(saved);
+
+    toggle.addEventListener('click', function () {
+      var current = root.getAttribute('data-theme');
+      var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var next = isDark ? 'light' : 'dark';
+      applyTheme(next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+
+    var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    var targets = links.map(function (a) {
+      return document.getElementById(a.getAttribute('href').slice(1));
+    }).filter(Boolean);
+
+    if ('IntersectionObserver' in window && targets.length) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var id = entry.target.id;
+          var link = links.find(function (a) { return a.getAttribute('href') === '#' + id; });
+          if (!link) return;
+          if (entry.isIntersecting) {
+            links.forEach(function (a) { a.classList.remove('active'); });
+            link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+      targets.forEach(function (t) { observer.observe(t); });
+    }
+  })();
+</script>

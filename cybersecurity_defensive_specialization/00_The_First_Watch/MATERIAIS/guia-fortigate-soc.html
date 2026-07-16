@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Guia introdutório sobre FortiGate para estudantes e analistas SOC." />
+  <title>Guia FortiGate para SOC Analyst</title>
+  <style>
+    :root {
+      --bg: #08111f;
+      --panel: #0f1c2e;
+      --panel-2: #14243a;
+      --text: #e8eef7;
+      --muted: #a9b6c7;
+      --accent: #28d7a1;
+      --accent-2: #59a8ff;
+      --danger: #ff6b6b;
+      --warning: #ffc857;
+      --border: rgba(255,255,255,.09);
+      --shadow: 0 20px 50px rgba(0,0,0,.28);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(40,215,161,.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(89,168,255,.08), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 72px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border: 1px solid rgba(40,215,161,.24);
+      border-radius: 999px;
+      background: rgba(40,215,161,.08);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: .86rem;
+      letter-spacing: .03em;
+    }
+
+    h1 {
+      margin: 18px 0 16px;
+      font-size: clamp(2.3rem, 7vw, 5rem);
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+
+    .hero p {
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin: 0 0 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); }
+
+    .button.primary {
+      color: #04110d;
+      background: var(--accent);
+      border-color: transparent;
+    }
+
+    .button.secondary { background: rgba(255,255,255,.03); }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(14px);
+      background: rgba(8,17,31,.82);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      padding: 12px 0;
+      scrollbar-width: none;
+    }
+
+    nav a {
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    nav a:hover { color: var(--accent); }
+
+    main { padding: 54px 0 72px; }
+
+    section { margin-bottom: 56px; }
+
+    .section-title {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .section-title span {
+      display: grid;
+      place-items: center;
+      min-width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(40,215,161,.18), rgba(89,168,255,.18));
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      letter-spacing: -.03em;
+    }
+
+    h3 { margin-top: 0; font-size: 1.1rem; }
+
+    .lead { color: var(--muted); max-width: 850px; }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .card {
+      background: linear-gradient(180deg, rgba(20,36,58,.92), rgba(15,28,46,.92));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card p, .card li { color: var(--muted); }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: .76rem;
+      font-weight: 800;
+      background: rgba(89,168,255,.1);
+      color: var(--accent-2);
+      margin-bottom: 12px;
+    }
+
+    .diagram {
+      background: #050a12;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      overflow-x: auto;
+      color: #d7e3f3;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      white-space: pre;
+      line-height: 1.5;
+    }
+
+    pre {
+      margin: 0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    code { font-family: "SFMono-Regular", Consolas, monospace; }
+
+    .code-card {
+      background: #050a12;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .code-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .84rem;
+    }
+
+    .code-body {
+      padding: 18px;
+      color: #dbe7f5;
+      font-size: .92rem;
+    }
+
+    .command { color: var(--accent-2); }
+    .value { color: var(--warning); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 14px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--accent);
+      background: rgba(255,255,255,.025);
+      font-size: .88rem;
+    }
+
+    td { color: var(--muted); }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: rgba(40,215,161,.07);
+      padding: 16px 18px;
+      border-radius: 0 14px 14px 0;
+      color: var(--muted);
+    }
+
+    .warning {
+      border-left-color: var(--warning);
+      background: rgba(255,200,87,.07);
+    }
+
+    .danger {
+      border-left-color: var(--danger);
+      background: rgba(255,107,107,.07);
+    }
+
+    .checklist {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,.02);
+    }
+
+    .checklist li::before {
+      content: "✓";
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    footer {
+      padding: 28px 0 48px;
+      color: var(--muted);
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 820px) {
+      .grid.two, .grid.three { grid-template-columns: 1fr; }
+      .hero { padding-top: 48px; }
+      th, td { padding: 11px 10px; font-size: .9rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <span class="badge">FortiGate • Redes • SOC Analyst</span>
+      <h1>Guia prático de FortiGate</h1>
+      <p>
+        Aprenda o que é um FortiGate, como ler políticas de firewall, entender interfaces,
+        NAT, VPN, serviços, logs e o que um analista SOC precisa observar durante uma investigação.
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="#politicas">Começar pelas políticas</a>
+        <a class="button secondary" href="#soc">Ver checklist de SOC</a>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="container">
+      <a href="#o-que-e">O que é</a>
+      <a href="#politicas">Políticas</a>
+      <a href="#interfaces">Interfaces</a>
+      <a href="#objetos">Objetos</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#nat">NAT</a>
+      <a href="#vpn">VPN</a>
+      <a href="#logs">Logs</a>
+      <a href="#soc">SOC Analyst</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section id="o-que-e">
+      <div class="section-title"><span>1</span><h2>O que é FortiGate?</h2></div>
+      <p class="lead">
+        FortiGate é um firewall empresarial da Fortinet. Ele pode existir como equipamento físico,
+        máquina virtual ou serviço em nuvem. Normalmente fica entre a Internet e a rede interna da empresa.
+      </p>
+
+      <div class="diagram">Internet
+   │
+   ▼
+┌───────────────┐
+│   FortiGate   │
+│ Firewall / VPN│
+│ IPS / NAT     │
+└───────┬───────┘
+        │
+  ┌─────┴────────────┐
+  │                  │
+Rede interna        DMZ
+Computadores        Servidores</div>
+
+      <div class="grid three" style="margin-top:18px;">
+        <article class="card">
+          <span class="tag">Firewall</span>
+          <h3>Controla conexões</h3>
+          <p>Decide qual tráfego será permitido ou bloqueado conforme origem, destino, porta e regra.</p>
+        </article>
+        <article class="card">
+          <span class="tag">Segurança</span>
+          <h3>Detecta ameaças</h3>
+          <p>Pode usar IPS, antivírus, filtro web, controle de aplicações e inspeção SSL.</p>
+        </article>
+        <article class="card">
+          <span class="tag">Empresas</span>
+          <h3>Protege redes corporativas</h3>
+          <p>É comum em empresas, hospitais, bancos, órgãos públicos, universidades e data centers.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="politicas">
+      <div class="section-title"><span>2</span><h2>Como ler uma política de firewall</h2></div>
+      <p class="lead">Leia sempre nesta ordem: origem, destino, serviço, ação, logs, status e NAT.</p>
+
+      <div class="code-card">
+        <div class="code-head"><span>Exemplo FortiGate CLI</span><span>config firewall policy</span></div>
+        <div class="code-body"><pre><code><span class="command">edit</span> <span class="value">1</span>
+    <span class="command">set name</span> <span class="value">"Allow-Web-Inbound"</span>
+    <span class="command">set srcintf</span> <span class="value">"wan1"</span>
+    <span class="command">set dstintf</span> <span class="value">"dmz"</span>
+    <span class="command">set srcaddr</span> <span class="value">"all"</span>
+    <span class="command">set dstaddr</span> <span class="value">"web-srv-01"</span>
+    <span class="command">set action</span> <span class="value">accept</span>
+    <span class="command">set service</span> <span class="value">"HTTP" "HTTPS"</span>
+    <span class="command">set logtraffic</span> <span class="value">all</span>
+    <span class="command">set status</span> <span class="value">enable</span>
+<span class="command">next</span></code></pre></div>
+      </div>
+
+      <div style="overflow-x:auto; margin-top:18px;">
+        <table>
+          <thead>
+            <tr><th>Campo</th><th>Significado</th><th>Pergunta para o analista</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>set name</code></td><td>Nome da regra</td><td>Qual é o objetivo da regra?</td></tr>
+            <tr><td><code>set srcintf</code></td><td>Interface de origem</td><td>De qual rede vem o tráfego?</td></tr>
+            <tr><td><code>set dstintf</code></td><td>Interface de destino</td><td>Para qual rede ele vai?</td></tr>
+            <tr><td><code>set srcaddr</code></td><td>IP ou grupo de origem</td><td>Quem está iniciando a conexão?</td></tr>
+            <tr><td><code>set dstaddr</code></td><td>IP ou grupo de destino</td><td>Qual ativo está sendo acessado?</td></tr>
+            <tr><td><code>set service</code></td><td>Serviço ou porta</td><td>Qual protocolo está sendo usado?</td></tr>
+            <tr><td><code>set action</code></td><td>Permitir ou negar</td><td>A conexão foi aceita ou bloqueada?</td></tr>
+            <tr><td><code>set logtraffic</code></td><td>Registro de logs</td><td>Existe evidência para investigação?</td></tr>
+            <tr><td><code>set status</code></td><td>Regra ativa ou desativada</td><td>A regra está funcionando?</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning" style="margin-top:18px;">
+        As regras são processadas de cima para baixo. Quando o tráfego combina com uma regra,
+        o FortiGate aplica essa regra e normalmente interrompe a procura.
+      </div>
+    </section>
+
+    <section id="interfaces">
+      <div class="section-title"><span>3</span><h2>Interfaces mais comuns</h2></div>
+      <div class="grid three">
+        <article class="card"><h3>WAN</h3><p>Interface conectada à Internet. Exemplos: <code>wan1</code>, <code>wan2</code>.</p></article>
+        <article class="card"><h3>Internal / LAN</h3><p>Rede interna da empresa onde ficam computadores, impressoras e servidores internos.</p></article>
+        <article class="card"><h3>DMZ</h3><p>Zona separada para servidores públicos, como servidor web e servidor de e-mail.</p></article>
+        <article class="card"><h3>VPN</h3><p>Interface lógica usada por usuários remotos ou túneis entre filiais.</p></article>
+        <article class="card"><h3>Guest</h3><p>Rede de visitantes, normalmente isolada da rede corporativa.</p></article>
+        <article class="card"><h3>Management</h3><p>Interface dedicada à administração do equipamento.</p></article>
+      </div>
+    </section>
+
+    <section id="objetos">
+      <div class="section-title"><span>4</span><h2>Objetos de endereço</h2></div>
+      <p class="lead">
+        Objetos são nomes usados para representar IPs, redes ou grupos. Eles tornam as regras mais fáceis de entender.
+      </p>
+      <div class="grid two">
+        <div class="card">
+          <h3>Exemplo</h3>
+          <ul>
+            <li><code>web-srv-01</code> → 10.10.20.15</li>
+            <li><code>server-subnet</code> → 10.10.20.0/24</li>
+            <li><code>finance-users</code> → grupo de máquinas do financeiro</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Por que isso importa?</h3>
+          <p>
+            Em uma investigação, o nome do objeto pode indicar rapidamente qual servidor,
+            departamento ou rede está envolvido.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="servicos">
+      <div class="section-title"><span>5</span><h2>Serviços e portas</h2></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>Serviço</th><th>Porta</th><th>Uso principal</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>HTTP</td><td>80/TCP</td><td>Navegação web sem criptografia</td></tr>
+            <tr><td>HTTPS</td><td>443/TCP</td><td>Navegação web criptografada</td></tr>
+            <tr><td>SSH</td><td>22/TCP</td><td>Administração remota de sistemas Linux</td></tr>
+            <tr><td>DNS</td><td>53/UDP e TCP</td><td>Resolução de nomes</td></tr>
+            <tr><td>SMTP</td><td>25/TCP</td><td>Envio de e-mails entre servidores</td></tr>
+            <tr><td>RDP</td><td>3389/TCP</td><td>Acesso remoto a Windows</td></tr>
+            <tr><td>ALL</td><td>Todas</td><td>Permite qualquer serviço; exige atenção</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout danger" style="margin-top:18px;">
+        Regras com <code>service "ALL"</code>, <code>srcaddr "all"</code> ou <code>dstaddr "all"</code>
+        podem ser amplas demais. O analista deve verificar se existe justificativa.
+      </div>
+    </section>
+
+    <section id="nat">
+      <div class="section-title"><span>6</span><h2>NAT</h2></div>
+      <p class="lead">
+        NAT traduz endereços IP. É muito usado para permitir que dispositivos com IP privado acessem a Internet.
+      </p>
+      <div class="diagram">Computador interno
+192.168.1.50
+      │
+      ▼
+FortiGate com NAT
+      │
+      ▼
+IP público da empresa
+203.0.113.10
+      │
+      ▼
+Internet</div>
+      <div class="callout" style="margin-top:18px;">
+        Em uma investigação, lembre-se: o IP público visto fora da empresa pode representar vários dispositivos internos.
+        Para identificar o verdadeiro host, é necessário consultar os logs de NAT.
+      </div>
+    </section>
+
+    <section id="vpn">
+      <div class="section-title"><span>7</span><h2>VPN</h2></div>
+      <div class="grid two">
+        <article class="card">
+          <h3>SSL VPN</h3>
+          <p>Usada por funcionários remotos para acessar a rede corporativa.</p>
+        </article>
+        <article class="card">
+          <h3>IPsec VPN</h3>
+          <p>Usada para criar túneis seguros entre filiais, data centers ou redes em nuvem.</p>
+        </article>
+      </div>
+      <h3 style="margin-top:22px;">O que verificar em logs de VPN</h3>
+      <ul class="checklist">
+        <li>Nome do usuário</li>
+        <li>IP de origem</li>
+        <li>Horário da conexão</li>
+        <li>País ou localização aproximada</li>
+        <li>Falhas repetidas de autenticação</li>
+        <li>Acesso fora do horário normal</li>
+      </ul>
+    </section>
+
+    <section id="logs">
+      <div class="section-title"><span>8</span><h2>Logs e eventos</h2></div>
+      <p class="lead">
+        Os logs mostram o que o firewall permitiu, bloqueou ou detectou. Eles podem ser enviados para FortiAnalyzer,
+        Wazuh, Splunk, Elastic, Sentinel ou outro SIEM.
+      </p>
+      <div class="grid three">
+        <article class="card"><h3>Traffic log</h3><p>Origem, destino, porta, ação, bytes e regra aplicada.</p></article>
+        <article class="card"><h3>VPN log</h3><p>Login, logout, falha de autenticação e criação de túnel.</p></article>
+        <article class="card"><h3>IPS log</h3><p>Exploração detectada, assinatura, severidade e destino.</p></article>
+        <article class="card"><h3>Web Filter</h3><p>Sites acessados, categorias, bloqueios e usuário.</p></article>
+        <article class="card"><h3>Antivirus</h3><p>Arquivo malicioso, nome da ameaça e ação tomada.</p></article>
+        <article class="card"><h3>System log</h3><p>Alterações de configuração, login administrativo e falhas do sistema.</p></article>
+      </div>
+    </section>
+
+    <section id="soc">
+      <div class="section-title"><span>9</span><h2>Checklist para SOC Analyst</h2></div>
+      <ul class="checklist">
+        <li>Identificar IP de origem e destino</li>
+        <li>Verificar porta, protocolo e serviço</li>
+        <li>Confirmar se a ação foi accept ou deny</li>
+        <li>Identificar a regra que autorizou ou bloqueou a conexão</li>
+        <li>Verificar se existe NAT e localizar o IP interno verdadeiro</li>
+        <li>Checar usuário e contexto de VPN</li>
+        <li>Procurar repetição, volume anormal ou padrão de ataque</li>
+        <li>Comparar o evento com IPS, antivírus e web filter</li>
+        <li>Verificar horário, localização e ativo afetado</li>
+        <li>Documentar evidências e recomendar contenção</li>
+      </ul>
+    </section>
+
+    <section>
+      <div class="section-title"><span>10</span><h2>Ordem recomendada de estudo</h2></div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Fundamentos</h3>
+          <ol>
+            <li>IP e sub-redes</li>
+            <li>TCP e UDP</li>
+            <li>Portas e protocolos</li>
+            <li>LAN, WAN e DMZ</li>
+            <li>Roteamento básico</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h3>FortiGate</h3>
+          <ol>
+            <li>Firewall policies</li>
+            <li>Interfaces</li>
+            <li>Objetos</li>
+            <li>NAT</li>
+            <li>VPN</li>
+            <li>Logs</li>
+            <li>IPS e filtros</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      Guia de estudo FortiGate para iniciantes e futuros analistas SOC.
+    </div>
+  </footer>
+</body>
+</html>

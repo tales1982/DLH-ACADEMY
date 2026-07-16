@@ -1,0 +1,201 @@
+================================================================================
+            RESUMOS DE VIOLAÇÕES NO SETOR DE SAÚDE
+            Compilado de: Avisos da CISA, Portal de Violações do HHS, Relatórios Públicos
+            Preparado para: Validação da Postura de Segurança da MedDefense
+            Nota: Nomes de organizações anonimizados. Detalhes de fontes públicas.
+================================================================================
+
+========================================================================
+RESUMO DE VIOLAÇÃO 1: "Regional Hospital Alpha" -- Ransomware via VPN
+========================================================================
+
+Data: Q3 2023
+Organização: Hospital regional de 280 leitos, 3 unidades ambulatoriais, ~1.800 funcionários
+Setor: Cuidados agudos + serviços ambulatoriais
+
+O QUE ACONTECEU:
+Os atacantes obtiveram acesso inicial através de um appliance de VPN que
+tinha uma vulnerabilidade conhecida (CVE publicada 4 meses antes, patch
+disponível, não aplicado). A VPN dava acesso de rede direto ao ambiente
+de servidores interno. Uma vez dentro, os atacantes se moveram
+lateralmente pela rede plana, alcançando o controlador de domínio do
+Active Directory em 3 horas. Eles usaram uma conta de domain admin
+comprometida para implantar ransomware em todos os sistemas Windows
+simultaneamente via Group Policy.
+
+O ransomware criptografou 23 servidores e aproximadamente 400 estações
+de trabalho. O sistema de EHR, o sistema de faturamento e os arquivos de
+imagem foram todos afetados. O hospital desviou ambulâncias por 11 dias
+e cancelou 340 procedimentos agendados.
+
+POR QUE FUNCIONOU:
+- O appliance de VPN não havia sido corrigido apesar de um aviso crítico
+  do fabricante 4 meses antes. A equipe de TI estava ciente do aviso mas
+  não havia agendado a manutenção.
+- A rede interna era plana: sem segmentação entre o ponto de VPN, os
+  servidores e as estações de trabalho. Uma vez passado o perímetro, o
+  atacante tinha movimento lateral irrestrito.
+- Nenhum monitoramento de rede ou detecção de intrusão estava em vigor.
+  As 3 horas de reconhecimento do atacante foram invisíveis.
+- Os backups ficavam num dispositivo NAS na mesma rede. O ransomware
+  criptografou os backups junto com os sistemas de produção. O backup
+  viável mais recente tinha 5 semanas (de um rodízio mensal de fita
+  offsite).
+- Não existia plano de resposta a incidentes. A resposta foi improvisada
+  ao longo de 11 dias, com consultores externos trazidos no dia 3.
+
+IMPACTO:
+- 11 dias de indisponibilidade do EHR (operação baseada em papel)
+- $3,2 milhões em custos de recuperação (consultores, hardware novo,
+  horas extras)
+- $1,8 milhão em receita perdida (procedimentos cancelados, pacientes
+  desviados)
+- Investigação regulatória pelo HHS Office for Civil Rights
+- CEO renunciou 4 meses após o incidente
+- Quantidade desconhecida de dados de pacientes potencialmente
+  exfiltrados antes da criptografia
+
+LIÇÕES CITADAS NO RELATÓRIO PÚBLICO:
+1. Gestão de patches para dispositivos de perímetro é uma questão de
+   sobrevivência
+2. Segmentação de rede teria contido o dano
+3. Backups precisam estar isolados da rede de produção
+4. Capacidade de detecção não é opcional (horas de permanência sem
+   nenhum alerta)
+5. Um plano de resposta a incidentes nunca testado equivale a nenhum
+   plano
+
+========================================================================
+RESUMO DE VIOLAÇÃO 2: "Health Network Beta" -- Insider + Abuso de Credenciais
+========================================================================
+
+Data: Q1 2024
+Organização: Rede de saúde multi-site, 5 clínicas, ~950 funcionários
+Setor: Cuidado ambulatorial especializado (cardiologia, ortopedia, dermatologia)
+
+O QUE ACONTECEU:
+Um ex-funcionário do departamento de faturamento manteve credenciais
+ativas de VPN e EHR por 47 dias após a demissão. O processo de
+desligamento da organização exigia que o gestor do funcionário que
+estava saindo abrisse um chamado pedindo a desativação da conta. O
+gestor esqueceu. A TI não tinha nenhum processo automatizado para
+detectar ou desativar contas adormecidas.
+
+O ex-funcionário acessou o sistema de EHR remotamente 14 vezes ao longo
+de 6 semanas, baixando prontuários de 3.211 indivíduos. Os dados
+incluíam nomes, datas de nascimento, números de seguro social,
+informação de convênio e códigos de diagnóstico. A violação foi
+descoberta quando um paciente entrou em contato com a organização após
+receber uma fatura médica fraudulenta.
+
+POR QUE FUNCIONOU:
+- Sem desativação automática de conta ligada ao processo de demissão do
+  RH. O ciclo de vida da conta dependia inteiramente de uma ação manual
+  do gestor.
+- Sem MFA no acesso à VPN ou ao EHR. O ex-funcionário usou seu usuário e
+  senha originais.
+- Sem monitoramento de padrões de acesso. A conta era usada
+  exclusivamente fora do horário (entre 22h e 2h) a partir de um
+  endereço IP que nunca havia sido associado àquele usuário. Nenhum
+  alerta foi gerado.
+- O sistema de EHR registrava eventos de acesso, mas ninguém revisava os
+  logs. A trilha de auditoria existia mas nunca foi examinada até a
+  investigação da violação.
+- Sem controles de DLP (Prevenção de Perda de Dados) na exportação de
+  dados do EHR. O ex-funcionário conseguiu baixar 3.211 registros sem
+  disparar nenhum alerta.
+
+IMPACTO:
+- 3.211 pacientes notificados de violação de PHI
+- $890.000 em custos de resposta à violação (notificação, monitoramento
+  de crédito, jurídico, investigação)
+- Investigação do HHS e possível multa de HIPAA (pendente no momento do
+  relatório)
+- Ação coletiva movida por pacientes afetados
+- Dano reputacional significativo num mercado ambulatorial competitivo
+
+LIÇÕES CITADAS NO RELATÓRIO PÚBLICO:
+1. O desligamento precisa ser automatizado e integrado aos sistemas de RH
+2. MFA não é opcional para nenhum acesso remoto, especialmente a
+   sistemas clínicos
+3. O monitoramento de acesso precisa incluir análise comportamental
+   (horários incomuns, volumes incomuns, IPs de origem incomuns)
+4. Logs sem revisão são teatro de segurança
+5. Controles de DLP em exportações de dados sensíveis são essenciais
+   contra ameaça interna
+
+========================================================================
+RESUMO DE VIOLAÇÃO 3: "Community Hospital Gamma" -- Pivô por Dispositivo Médico
+========================================================================
+
+Data: Q4 2024
+Organização: Hospital comunitário de 150 leitos, localização única, ~600 funcionários
+Setor: Cuidados agudos, pequeno/rural
+
+O QUE ACONTECEU:
+Os atacantes comprometeram um portal do paciente voltado à internet que
+tinha uma vulnerabilidade de aplicação web não corrigida. O servidor do
+portal estava numa DMZ, mas a configuração da DMZ permitia conexões de
+saída para a rede interna (uma má configuração comum). A partir do
+servidor do portal, os atacantes descobriram que dispositivos médicos
+IoT (monitores de paciente e bombas de infusão) estavam acessíveis na
+mesma rede que estações clínicas e servidores.
+
+Os atacantes não tinham como alvo inicial dados de pacientes. Eles
+usaram o portal comprometido para instalar software de mineração de
+criptomoeda no servidor do portal e em 3 estações clínicas. Porém,
+durante o movimento lateral, descobriram que várias interfaces de
+gerenciamento de bombas de infusão estavam acessíveis com credenciais
+padrão. Eles acessaram o console de gerenciamento das bombas, que
+continha nomes de pacientes e informação de dosagem de medicamentos.
+
+A violação foi descoberta por um técnico de engenharia biomédica que
+notou tráfego de rede incomum vindo da rede de bombas de infusão durante
+uma manutenção de rotina, 23 dias após o comprometimento inicial.
+
+POR QUE FUNCIONOU:
+- O portal do paciente tinha uma vulnerabilidade de aplicação web
+  conhecida. O patch estava disponível havia 2 meses.
+- A DMZ permitia conexões de saída para a rede interna. As regras do
+  firewall permitiam isso "para funcionalidade da aplicação", mas isso
+  anulava o propósito da DMZ.
+- Sem segmentação de rede entre dispositivos médicos e o resto da
+  infraestrutura. Uma vez na rede interna, todos os dispositivos IoT
+  eram diretamente alcançáveis.
+- As interfaces de gerenciamento de dispositivos médicos usavam
+  credenciais padrão. O console de gerenciamento das bombas de infusão
+  usava as credenciais padrão de fábrica admin/admin, que nunca haviam
+  sido trocadas.
+- Nenhum monitoramento de rede detectou o movimento lateral ou o tráfego
+  de mineração de criptomoeda por 23 dias. A única detecção foi um
+  humano notando padrões de tráfego incomuns manualmente.
+- O firmware do dispositivo médico tinha vulnerabilidades conhecidas (o
+  fabricante havia emitido avisos recomendando isolamento de rede como
+  mitigação primária, já que patches de firmware não estavam
+  disponíveis).
+
+IMPACTO:
+- Exposição de dados de aproximadamente 800 pacientes (nomes,
+  medicamentos, dados de dosagem do sistema de gerenciamento de bombas
+  de infusão)
+- A mineração de criptomoeda causou degradação de performance em 3
+  estações clínicas, potencialmente afetando a entrega de cuidado
+- Notificação à FDA exigida devido ao envolvimento de dispositivo médico
+- 23 dias de permanência com acesso total à rede
+- $420.000 em resposta a incidente e custos de remediação
+- Redesenho de rede forçado e projeto de isolamento de dispositivos
+  médicos ($180.000)
+
+LIÇÕES CITADAS NO RELATÓRIO PÚBLICO:
+1. Dispositivos médicos IoT PRECISAM estar em segmentos de rede isolados
+2. Credenciais padrão em qualquer sistema são uma porta aberta
+3. Má configuração de DMZ (permitindo saída para a rede interna) é tão
+   perigosa quanto não ter DMZ nenhuma
+4. Monitoramento de rede é a diferença entre uma violação de 23 dias e
+   uma detecção no mesmo dia
+5. Segurança de dispositivo médico exige colaboração entre TI, segurança
+   e engenharia biomédica
+
+========================================================================
+            FIM DOS RESUMOS DE VIOLAÇÃO
+========================================================================

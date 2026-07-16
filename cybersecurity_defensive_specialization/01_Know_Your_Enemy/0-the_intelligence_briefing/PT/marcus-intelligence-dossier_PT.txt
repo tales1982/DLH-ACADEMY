@@ -1,0 +1,298 @@
+================================================================================
+          MARCUS WEBB -- COLETÂNEA DE INTELIGÊNCIA DE AMEAÇAS
+          Pasta: C:\Users\marcus\Documents\Threat_Intel\
+          Última modificação: [3 meses atrás]
+          Status: Coleta bruta, parcialmente anotada, nunca sintetizada
+================================================================================
+
+========================================================================
+ARQUIVO 1: Trecho do Aviso da CISA para Saúde (AA24-131A, condensado)
+========================================================================
+
+Fonte: Cybersecurity and Infrastructure Security Agency
+Título: "Tendências de Ransomware Direcionado à Saúde -- Resumo Anual"
+
+Principais achados:
+
+A saúde foi o setor de infraestrutura crítica mais visado por ransomware
+em 2023 e 2024, respondendo por 25% de todos os incidentes de ransomware
+reportados entre os 16 setores de infraestrutura crítica.
+
+Grupos de ransomware usam cada vez mais dupla extorsão: criptografando
+sistemas E ameaçando publicar dados de pacientes roubados. Em 73% dos
+incidentes de ransomware em saúde no último ano, os agentes de ameaça
+exfiltraram dados antes de implantar a criptografia.
+
+Os vetores de acesso inicial mais comuns para ransomware em saúde:
+  1. Exploração de aplicações voltadas à internet (VPN, portais web): 38%
+  2. Phishing com anexos ou links maliciosos: 31%
+  3. Credenciais válidas (compradas ou coletadas): 22%
+  4. Serviços remotos externos (RDP): 9%
+
+Tempo médio do acesso inicial até a implantação do ransomware: 5 dias.
+Indisponibilidade média de hospitais pós-ransomware: 18 dias.
+Custo total médio (recuperação + receita perdida + regulatório): $2,7 milhões.
+
+Anotação do Marcus: "38% via aplicações voltadas à internet. Nosso
+FortiGate é nosso único dispositivo de perímetro. Se tiver uma
+vulnerabilidade no firmware do FortiGate e não corrigirmos rápido o
+suficiente, esse é o ponto de entrada. E sabemos que temos Apache 2.4.29
+no billing-srv-01 com RCE conhecida. Isso me tira o sono."
+
+========================================================================
+ARQUIVO 2: Nota de Analista do HC3 -- Perfil de Agentes de Ameaça para Saúde
+========================================================================
+
+Fonte: Health Sector Cybersecurity Coordination Center (HC3)
+Título: "Categorias de Agentes de Ameaça que Miram o Setor de Saúde"
+
+CRIME ORGANIZADO / GRUPOS DE RANSOMWARE
+A ameaça dominante à saúde. Grupos operam plataformas Ransomware-as-a-
+Service (ex: LockBit, ALPHV/BlackCat, Royal/BlackSuit, Rhysida).
+Afiliados são motivados puramente por ganho financeiro. A saúde é
+visada porque: (a) a urgência clínica cria pressão para pagar, (b) dados
+de paciente têm alto valor no mercado negro ($250-$1.000 por registro
+vs $5-$50 por cartão de crédito), (c) sistemas legados fornecem pontos
+de entrada fáceis, (d) cobertura de seguro cria capacidade de pagamento.
+
+Sofisticação: Média a Alta. Compram acesso inicial de corretores, usam
+ferramentas comerciais e customizadas, e operam com eficiência
+empresarial.
+
+Perfil típico de vítima: Hospitais de médio porte (100-500 leitos),
+centros de saúde comunitários, clínicas especializadas. Organizações
+grandes o suficiente para pagar, mas pequenas o suficiente para ter
+orçamentos de segurança limitados.
+
+Anotação do Marcus: "A MedDefense se encaixa exatamente nesse perfil.
+350 leitos. Orçamento de segurança limitado. Um analista de segurança
+(eu). Essa é nossa ameaça nº 1."
+
+AGENTES DE ESTADO-NAÇÃO
+Miram primariamente P&D de saúde: empresas farmacêuticas, pesquisa de
+vacinas, dados de ensaios clínicos, bancos de dados genéticos. Grupos
+atribuídos à China (APT41), Rússia (APT29) e Coreia do Norte (Lazarus)
+já miraram organizações de saúde.
+
+Provedores de saúde (hospitais, clínicas) são alvos secundários, a
+menos que participem de pesquisa de ponta ou sirvam de trampolim para
+parceiros farmacêuticos.
+
+Sofisticação: Muito Alta. Malware customizado, exploração de zero-day,
+tempos de permanência prolongados (meses a anos).
+
+Anotação do Marcus: "Baixa probabilidade para a MedDefense -- não
+fazemos pesquisa. Mas se algum dia fizermos parceria com uma
+universidade pra ensaios clínicos, isso muda."
+
+AMEAÇAS INTERNAS (INSIDER)
+Respondem por aproximadamente 35% das violações de dados em saúde
+(suplemento de saúde do Verizon DBIR). Divididas aproximadamente 60/40
+entre insiders negligentes e maliciosos.
+
+Negligentes: Dispositivos perdidos, e-mails mal direcionados, descarte
+inadequado, compartilhamento de credenciais, shadow IT. A fonte mais
+comum de violações de HIPAA.
+Maliciosos: Roubo de dados por ganho financeiro (venda de prontuários),
+acesso não autorizado motivado por curiosidade (bisbilhotar celebridades),
+sabotagem (funcionários insatisfeitos).
+
+A saúde é particularmente vulnerável porque fluxos de trabalho clínicos
+exigem acesso amplo a dados de paciente. Restringir acesso demais
+prejudica a entrega de cuidado. Encontrar o equilíbrio é o desafio central.
+
+Anotação do Marcus: "A conta compartilhada da radiologia é uma bomba-
+relógio de responsabilização. E a falta de desligamento automatizado
+significa que todo funcionário demitido é uma conta fantasma em
+potencial."
+
+HACKTIVISTAS
+Infrequentes, mas em crescimento. Alvos incluem hospitais percebidos
+como tendo políticas controversas (restrições de saúde reprodutiva,
+práticas de precificação) ou organizações envolvidas em conflitos
+geopolíticos.
+
+Tendência recente: ataques DDoS contra sites de hospitais por grupos
+afiliados a causas geopolíticas (grupos pró-Rússia mirando saúde
+ocidental durante o conflito na Ucrânia).
+
+Sofisticação: Baixa a Média. Primariamente DDoS, desfiguração de site,
+vazamentos de dados para publicidade.
+
+Anotação do Marcus: "Baixa prioridade para a MedDefense. Não somos
+politicamente controversos. Mas um DDoS no nosso portal do paciente
+ainda poderia causar problemas."
+
+ATACANTES SEM HABILIDADE / OPORTUNISTAS
+Script kiddies, scanners automatizados, credential stuffing em massa.
+Não miram organizações específicas -- miram vulnerabilidades
+específicas em toda a internet. Se sua VPN, servidor web ou porta RDP
+estiver exposta com uma vulnerabilidade conhecida, você será encontrado.
+
+A ascensão de ataques assistidos por IA está reduzindo o piso de
+habilidade necessário. Ferramentas como cadeias de exploit automatizadas
+e e-mails de phishing escritos por IA tornam ataques antes sofisticados
+acessíveis a agentes de baixa habilidade.
+
+Anotação do Marcus: "O billing-srv-01 é a prova. O minerador de
+criptomoeda não foi um ataque direcionado. Alguém escaneou a internet
+inteira atrás da RCE do Apache 2.4.29, achou o nosso, e largou um
+minerador. Esforço zero, direcionamento zero. Pura oportunidade."
+
+========================================================================
+ARQUIVO 3: Estatísticas do Portal de Violações do HHS (resumo em Excel do Marcus)
+========================================================================
+
+Fonte: HHS Office for Civil Rights Breach Portal
+Período: Últimos 24 meses
+Escopo: Violações de saúde afetando 500+ indivíduos
+
+Total de violações reportadas: 1.247
+Total de indivíduos afetados: 168 milhões+
+
+Divisão por tipo:
+  Hacking/incidente de TI:     78% (incluindo ransomware, phishing, exploit)
+  Acesso não autorizado:       14% (insider, abuso de credencial)
+  Roubo:                        4% (roubo físico de dispositivo)
+  Perda:                        2% (dispositivos perdidos, dado mal direcionado)
+  Outro/desconhecido:           2%
+
+Divisão por local da informação violada:
+  Servidor de rede:            43%
+  E-mail:                      27%
+  Prontuário eletrônico:       16%
+  Computador desktop:           7%
+  Outro dispositivo portátil:   7%
+
+Anotação do Marcus: "43% servidor de rede. 16% prontuário eletrônico.
+Esses são nossos principais ativos críticos. Se nosso EHR ou nossos
+servidores forem violados, estamos na categoria dos 78% de hacking e
+nos 43% de servidor. Estatisticamente, a pergunta não é se, é quando."
+
+========================================================================
+ARQUIVO 4: Incidente de Ransomware -- Resumo de Caso de Hospital Regional
+========================================================================
+
+Fonte: Reportagem pública + relatório pós-incidente da CISA (anonimizado)
+Data: 8 meses atrás
+
+Um hospital regional de 280 leitos (perfil similar à MedDefense) foi
+atingido por um grupo de ransomware que obteve acesso inicial através
+de uma vulnerabilidade em um appliance de VPN. Linha do tempo principal:
+
+  Dia 0: Atacante explora vulnerabilidade de VPN conhecida (CVE publicada
+         4 meses antes, patch não aplicado)
+  Dia 1: Atacante se move lateralmente pela rede plana
+  Dia 2: Atacante alcança o Controlador de Domínio
+  Dia 3: Atacante exfiltra 42GB de dados de pacientes
+  Dia 5: Ransomware implantado via Group Policy em todos os sistemas Windows
+
+  Impacto: 23 servidores e ~400 estações de trabalho criptografados
+  Indisponibilidade: 11 dias (desvio de ambulâncias, cancelamento de procedimentos)
+  Custo: $3,2M de recuperação + $1,8M de receita perdida
+  Dados expostos: quantidade desconhecida de prontuários (exfiltração confirmada)
+
+  Achados pós-incidente:
+  - O patch da VPN estava disponível, mas a TI não havia agendado manutenção
+  - A rede era plana (sem segmentação interna)
+  - Os backups estavam num NAS na mesma rede (criptografado pelo ransomware)
+  - Nenhum SIEM ou IDS estava implantado (atacante se moveu sem detecção por 5 dias)
+  - Não existia plano de resposta a incidentes
+
+Anotação do Marcus: "ISSO SOMOS NÓS. Cada achado se aplica à MedDefense.
+Rede plana, backup em NAS no mesmo rack, sem SIEM, sem plano de RI, e
+temos sistemas não corrigidos. Eu escrevi os achados de postura mas
+fiquei sem tempo de conectá-los ao panorama de ameaças. Meu substituto
+precisa terminar esse trabalho."
+
+========================================================================
+ARQUIVO 5: Artigo -- "A Economia do Ransomware em Saúde"
+========================================================================
+
+Fonte: Healthcare IT Security Journal (publicação especializada)
+Autor: Analista do setor
+
+Trechos principais:
+
+"Organizações de saúde pagam resgates numa taxa maior que qualquer outro
+setor (60% vs 46% de média entre indústrias). O motivo é simples: quando
+uma fábrica para, ela perde dinheiro. Quando um hospital para, pacientes
+podem morrer."
+
+"O valor médio de resgate exigido em saúde dobrou entre 2022 e 2024, de
+$1,2M para $2,5M. Mas o resgate é o menor custo. A recuperação
+(reconstrução de sistemas, investigação forense, jurídico) tem média de
+$2,7M. A receita perdida por pacientes desviados e procedimentos
+cancelados tem média de $1,5M. Multas regulatórias têm média de $350K.
+O dano reputacional é imensurável, mas frequentemente o custo mais
+duradouro."
+
+"Dados de pacientes têm preços premium em mercados da dark web porque
+contêm tudo que é necessário para roubo de identidade E fraude de
+seguro: nome, data de nascimento, CPF/SSN, número da apólice de seguro,
+histórico médico. Diferente de um cartão de crédito roubado (cancelado
+em horas), o roubo de identidade médica pode passar meses sem ser
+detectado."
+
+"O modelo Ransomware-as-a-Service industrializou os ataques contra a
+saúde. Desenvolvedores constroem as ferramentas. Corretores de Acesso
+Inicial vendem pontos de entrada de rede por $500-$10.000. Afiliados
+implantam o payload e negociam o resgate. Cada participante fica com
+uma porcentagem. É uma cadeia de suprimentos profissional."
+
+Anotação do Marcus: "A economia explica por que somos alvo. Somos um
+hospital de médio porte com dados regulados e urgência clínica. Somos
+exatamente o perfil que afiliados de RaaS procuram."
+
+========================================================================
+ARQUIVO 6: Análise Inacabada do Marcus (documento Word, 1 página)
+========================================================================
+
+Título: "Panorama de Ameaças da MedDefense -- RASCUNHO"
+Salvo pela última vez: [3 meses atrás, 23h47]
+
+"Notas para a análise formal -- preciso terminar antes de sair:
+
+Ameaças prioritárias para a MedDefense (em ordem de probabilidade avaliada):
+
+1. Ransomware (crime organizado / RaaS): probabilidade CRÍTICA
+   - Encaixamos exatamente no perfil-alvo
+   - Nossas lacunas (rede plana, sem SIEM, backup não isolado) são
+     precisamente as fraquezas que esses grupos exploram
+   - Três hospitais regionais atingidos em 8 meses -- estamos na
+     mesma coorte geográfica/de porte
+
+2. Ameaça interna (negligente): probabilidade ALTA
+   - Credenciais compartilhadas (radiologia)
+   - Sem desligamento automatizado
+   - Baixa conclusão de treinamento
+   - Shadow IT (NAS do Dr. Patel, provavelmente outros)
+
+3. Oportunista/sem habilidade: probabilidade ALTA
+   - O minerador de criptomoeda do billing-srv-01 prova que já estamos sendo atingidos
+   - Serviços voltados à internet não corrigidos são achados por scanners automatizados
+
+4. Ameaça interna (maliciosa): probabilidade MÉDIA
+   - Sem DLP, sem restrição de USB, sem monitoramento comportamental
+   - Se alguém quisesse exfiltrar dados, nada o impede
+
+5. Hacktivista: probabilidade BAIXA
+   - Sem perfil político, sem controvérsia
+   - Mas um DDoS no portal do paciente causaria disrupção
+
+6. Estado-nação: probabilidade BAIXA (a menos que programas de pesquisa comecem)
+
+Próximos passos:
+- Mapear vetores de ataque para ativos específicos da MedDefense
+- Aplicar STRIDE ao sistema de EHR
+- Construir kill chains para os 3 principais cenários
+- Correlacionar com a análise de lacunas
+- Produzir relatório formal
+
+Eu preciso te"
+
+[O documento termina no meio de uma frase]
+
+========================================================================
+                FIM DO DOSSIÊ DE INTELIGÊNCIA
+========================================================================

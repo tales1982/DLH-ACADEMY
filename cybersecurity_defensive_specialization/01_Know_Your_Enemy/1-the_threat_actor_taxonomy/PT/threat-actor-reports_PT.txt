@@ -1,0 +1,131 @@
+================================================================================
+          RELATÓRIOS DE INTELIGÊNCIA DE AMEAÇA -- EXERCÍCIO DE CLASSIFICAÇÃO
+          8 Relatórios de Incidente Anonimizados
+          Fonte: Compilado de divulgações públicas de violação e avisos da CISA
+================================================================================
+
+========================================================================
+RELATÓRIO A
+========================================================================
+
+Uma empresa farmacêutica global descobriu que dados proprietários de
+ensaios de medicamentos haviam sido copiados sistematicamente de seus
+servidores de pesquisa ao longo de um período de 14 meses. Os atacantes
+usaram uma ferramenta de acesso remoto construída sob medida que se
+comunicava via consultas DNS criptografadas, tornando a detecção
+extremamente difícil. O malware foi assinado com um certificado de
+assinatura de código roubado. A análise forense revelou que o
+comprometimento inicial ocorreu através de uma vulnerabilidade zero-day
+no appliance de VPN da empresa. Os dados roubados incluíam resultados
+de ensaios clínicos de Fase III avaliados em uma receita futura estimada
+de $2 bilhões.
+
+========================================================================
+RELATÓRIO B
+========================================================================
+
+O departamento de faturamento de um hospital regional foi alvo de uma
+campanha de e-mail. Os e-mails continham faturas que pareciam vir de um
+fornecedor de suprimentos médicos. Ao ser aberto, o PDF anexado explorava
+uma vulnerabilidade conhecida do Adobe Reader para instalar um trojan de
+acesso remoto (RAT) disponível comercialmente. Três semanas depois,
+ransomware foi implantado em toda a rede do hospital. Antes da
+criptografia, aproximadamente 15GB de prontuários de pacientes foram
+exfiltrados para um servidor externo. Os atacantes exigiram 40 Bitcoin
+(aproximadamente $1,6 milhão) e ameaçaram publicar os dados de pacientes
+se o pagamento não fosse recebido em até 72 horas.
+
+========================================================================
+RELATÓRIO C
+========================================================================
+
+O site público de um hospital foi desfigurado durante a noite. A página
+inicial foi substituída por uma mensagem criticando a decisão recente do
+hospital de fechar sua clínica comunitária gratuita. A mensagem incluía
+o logo de um grupo ativista conhecido e convocava protestos. Nenhum dado
+de paciente foi acessado. A desfiguração foi feita através de uma
+vulnerabilidade de SQL injection no sistema de gerenciamento de conteúdo
+do site. Os atacantes não fizeram nenhuma tentativa de avançar do
+servidor web para sistemas internos.
+
+========================================================================
+RELATÓRIO D
+========================================================================
+
+Um administrador de TI de uma empresa de seguro-saúde foi demitido após
+uma audiência disciplinar. Dois dias depois, tabelas de banco de dados
+de produção contendo dados de processamento de sinistros foram apagadas
+(dropped). A investigação revelou que o administrador havia criado uma
+conta VPN secundária antes da demissão, não vinculada ao diretório
+corporativo. A conta foi usada às 2h30 a partir do endereço IP
+residencial do administrador. O administrador também havia desativado
+o job de backup automatizado do banco de sinistros 3 dias antes de ser
+demitido.
+
+========================================================================
+RELATÓRIO E
+========================================================================
+
+Uma rede de clínicas descobriu software de mineração de criptomoeda em
+12 de suas estações de trabalho. O software havia sido instalado via um
+exploit automatizado mirando uma vulnerabilidade conhecida numa
+ferramenta de gerenciamento remoto (CVE publicada 6 meses antes). Os
+atacantes não tentaram acessar dados de pacientes, mover-se lateralmente
+para servidores, ou instalar backdoors persistentes. O software de
+mineração era uma ferramenta publicamente disponível configurada para
+minerar Monero. O endereço da carteira do atacante estava vinculado a um
+grupo de infecções similares em mais de 300 organizações no mundo todo,
+sugerindo exploração automatizada em massa em vez de ataque direcionado.
+
+========================================================================
+RELATÓRIO F
+========================================================================
+
+O sistema de chamada de enfermagem da rede de um hospital começou a
+funcionar mal durante um fim de semana. A investigação revelou que um
+funcionário do departamento de engenharia biomédica havia conectado um
+Raspberry Pi pessoal à rede de dispositivos médicos "para monitorar a
+performance da rede como um projeto pessoal." O Pi rodava uma versão
+desatualizada do Raspbian com credenciais padrão (pi/raspberry). Um
+atacante externo descobriu o dispositivo através de uma porta voltada
+à internet que o funcionário havia exposto inadvertidamente, usou as
+credenciais padrão para obter acesso, e pivotou do Pi para o sistema
+de chamada de enfermagem. O funcionário não tinha intenção maliciosa.
+
+========================================================================
+RELATÓRIO G
+========================================================================
+
+Um hospital de médio porte descobriu que 3.200 prontuários de pacientes
+haviam sido acessados e baixados ao longo de um período de 6 semanas.
+O acesso ocorreu através de uma conta legítima de médico, sempre fora do
+horário comercial (entre 23h e 4h), e sempre a partir do mesmo endereço
+IP. O médico em questão estava em licença médica prolongada durante todo
+o período. Quando confrontado, o médico negou qualquer envolvimento e
+apresentou documentação mostrando que estava fora do país.
+
+Os prontuários baixados não correspondiam a nenhum paciente atual ou
+antigo do médico. Os registros estavam concentrados em pacientes com
+planos de seguro de alto valor. Nenhuma exigência de resgate foi
+recebida. Os dados não apareceram em nenhum mercado conhecido da dark
+web até o momento deste relatório.
+
+========================================================================
+RELATÓRIO H
+========================================================================
+
+Uma startup de tecnologia em saúde recebeu um e-mail de um remetente
+desconhecido alegando ter descoberto uma vulnerabilidade crítica na API
+de agendamento de pacientes deles. O remetente exigiu $50.000 em
+criptomoeda em troca de não publicar os detalhes da vulnerabilidade e
+os 2.000 prontuários de pacientes que havia extraído como prova. O
+remetente forneceu uma amostra de 50 registros que foram verificados
+como autênticos. A análise dos logs da API confirmou acesso não
+autorizado a partir de um nó de saída Tor. A vulnerabilidade explorada
+era um endpoint de autenticação quebrado que havia sido reportado
+internamente por um desenvolvedor júnior 3 meses antes, mas foi
+despriorizado no backlog de desenvolvimento.
+
+========================================================================
+                FIM DOS RELATÓRIOS
+========================================================================
