@@ -1,0 +1,76 @@
+================================================================================
+          CONTESTAÇÃO DO CFO -- OBJEÇÕES DE ROBERT KIM
+          MedDefense Health Systems
+          Contexto: Preparação para reunião do Conselho, revisando o
+          orçamento de segurança
+================================================================================
+
+Robert Kim revisou o investimento proposto de $120.000 em segurança e
+a análise de custo-benefício que o sustenta. Ele tem 5 objeções.
+
+========================================================================
+OBJEÇÃO 1: "Nunca fomos violados. Por que gastar $120.000 agora?"
+========================================================================
+
+"A MedDefense opera há 12 anos sem um incidente de segurança
+significativo. Sim, houve o cryptominer no servidor de faturamento,
+mas aquilo foi um incômodo, não uma violação. Nossos dados de
+pacientes nunca foram comprometidos. Eu entendo o risco teórico, mas
+$120.000 é dinheiro de verdade que poderia financiar duas posições
+adicionais de enfermagem ou atualizar nosso equipamento de
+monitoramento cardíaco. Você consegue demonstrar que NÓS SEREMOS
+violados, não só que PODERÍAMOS ser?"
+
+========================================================================
+OBJEÇÃO 2: "Seus números de ALE são estimativas, não fatos."
+========================================================================
+
+"Eu revisei os cálculos de Annualized Loss Expectancy. Você estima o
+ALE do ransomware em aproximadamente $300.000. Mas esse número depende
+de suposições: o ARO de 0.25 (uma vez a cada 4 anos), o fator de
+exposição de 60%, o valor do ativo incluindo dano reputacional. Mude
+qualquer suposição em 30% e o número muda drasticamente. Como posso
+justificar um gasto real de $120.000 baseado em perdas estimadas que
+poderiam estar erradas por um fator de dois?"
+
+========================================================================
+OBJEÇÃO 3: "Seguro é mais barato que controles."
+========================================================================
+
+"Nós atualmente temos uma apólice de seguro cibernético com um limite
+agregado de $1 milhão e uma franquia de $50.000. O prêmio anual é de
+$38.000. Se formos violados, o seguro cobre a maioria da perda
+financeira. Por que deveríamos gastar $120.000 adicionais em
+prevenção quando o seguro cobre as consequências por um terço do
+custo? Não estou dizendo que não devemos investir em segurança de
+forma alguma, mas o seguro já fornece proteção financeira."
+
+========================================================================
+OBJEÇÃO 4: "Isso deveria ser o orçamento normal da TI, não um pedido
+especial."
+========================================================================
+
+"O departamento de TI da Sarah Park já tem um orçamento anual de
+$1,2 milhão para infraestrutura, suporte e operações. Segurança
+deveria fazer parte desse orçamento existente, não uma linha separada.
+Se segurança é prioridade, a Sarah deveria realocar do orçamento atual
+dela. Todo departamento quer um orçamento especial. Se eu aprovar
+$120.000 para segurança, o gerente de instalações vai querer $120.000
+para reformas do prédio, e a diretora de RH vai querer $120.000 para
+uma nova plataforma de treinamento."
+
+========================================================================
+OBJEÇÃO 5: "Podemos começar com $60.000 e ver se funciona?"
+========================================================================
+
+"Eu entendo a análise de risco, mas o Conselho é conservador. Eles
+aprovaram a contratação do analista de segurança (sua posição) como
+um primeiro passo. E se financiarmos $60.000 este ano, virmos
+resultados mensuráveis, e depois solicitarmos os $60.000 restantes no
+próximo ano? Essa é prática padrão para programas novos. Prove o
+conceito, depois escale. O que você consegue entregar pela metade do
+orçamento solicitado?"
+
+========================================================================
+          FIM DAS OBJEÇÕES DO CFO
+========================================================================

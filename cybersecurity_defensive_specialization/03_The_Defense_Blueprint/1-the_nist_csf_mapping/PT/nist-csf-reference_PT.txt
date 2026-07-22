@@ -1,0 +1,157 @@
+================================================================================
+          NIST CYBERSECURITY FRAMEWORK (CSF) 2.0
+          Resumo de Referência para a MedDefense Health Systems
+          Compilado para o Projeto 0x03: The Defense Blueprint
+================================================================================
+
+VISÃO GERAL:
+  Publicado por: National Institute of Standards and Technology (NIST)
+  Versão: 2.0 (lançada em fevereiro de 2024)
+  Escopo: Framework voluntário aplicável a qualquer organização
+  Estrutura: 6 Funções > Categorias > Subcategorias
+
+========================================================================
+FUNÇÃO 1: GOVERN (GV) -- Nova no CSF 2.0
+========================================================================
+Propósito: Estabelecer, comunicar e monitorar a estratégia de gestão de
+risco de cibersegurança da organização, suas expectativas e política.
+
+Categorias-Chave:
+  GV.OC: Contexto Organizacional
+    - A missão da organização, expectativas das partes interessadas, e
+      requisitos legais/regulatórios são entendidos
+  GV.RM: Estratégia de Gestão de Risco
+    - Apetite de risco, tolerância e estratégia são estabelecidos
+  GV.RR: Papéis, Responsabilidades e Autoridades
+    - Papéis e autoridades de cibersegurança são definidos
+  GV.PO: Política
+    - A política de cibersegurança é estabelecida e comunicada
+  GV.OV: Supervisão
+    - Resultados das atividades de cibersegurança são usados para
+      ajustar a estratégia
+  GV.SC: Gestão de Risco da Cadeia de Suprimentos de Cibersegurança
+    - Riscos da cadeia de suprimentos são identificados, avaliados e
+      gerenciados
+
+Perguntas de Avaliação para a MedDefense:
+  - A MedDefense tem uma estratégia de cibersegurança documentada?
+  - Os papéis de cibersegurança são formalmente atribuídos?
+  - Existe uma política de segurança formal (AUP, resposta a incidentes)?
+  - Existe um processo para revisar e atualizar as atividades de segurança?
+
+========================================================================
+FUNÇÃO 2: IDENTIFY (ID)
+========================================================================
+Propósito: Entender os riscos de cibersegurança atuais da organização.
+
+Categorias-Chave:
+  ID.AM: Gestão de Ativos
+    - Ativos físicos e de software são inventariados
+    - Fluxos de dados e sistemas de informação externos são mapeados
+  ID.RA: Avaliação de Risco
+    - Ameaças, vulnerabilidades, probabilidade e impacto são
+      identificados
+    - Respostas ao risco são determinadas
+  ID.IM: Melhoria
+    - Melhorias são identificadas a partir de avaliações e exercícios
+
+Perguntas de Avaliação para a MedDefense:
+  - Existe um inventário de ativos abrangente?
+  - Os riscos são formalmente avaliados com probabilidade e impacto?
+  - Uma avaliação de risco já foi realizada (ameaça + vulnerabilidade)?
+  - As lições aprendidas de incidentes são documentadas?
+
+========================================================================
+FUNÇÃO 3: PROTECT (PR)
+========================================================================
+Propósito: Usar salvaguardas para gerenciar riscos de cibersegurança.
+
+Categorias-Chave:
+  PR.AA: Gestão de Identidade, Autenticação e Controle de Acesso
+    - Identidades e credenciais são gerenciadas
+    - Permissões de acesso são aplicadas usando privilégio mínimo
+    - MFA é implementado onde apropriado
+  PR.AT: Conscientização e Treinamento
+    - Usuários são informados e treinados
+  PR.DS: Segurança de Dados
+    - Dados são protegidos em repouso, em trânsito e em uso
+  PR.PS: Segurança de Plataforma
+    - Hardware, software e serviços são gerenciados
+    - Baselines de configuração segura são mantidas
+  PR.IR: Resiliência da Infraestrutura Tecnológica
+    - Arquiteturas de segurança são gerenciadas para proteger ativos
+
+Perguntas de Avaliação para a MedDefense:
+  - O MFA está implantado em sistemas críticos?
+  - Os endpoints são endurecidos com baselines seguras?
+  - Os dados são criptografados em repouso e em trânsito?
+  - A rede é segmentada?
+  - Os usuários são treinados em conscientização de segurança?
+
+========================================================================
+FUNÇÃO 4: DETECT (DE)
+========================================================================
+Propósito: Encontrar e analisar possíveis ataques e comprometimentos de
+cibersegurança.
+
+Categorias-Chave:
+  DE.CM: Monitoramento Contínuo
+    - Redes e sistemas são monitorados para eventos de cibersegurança
+    - O ambiente físico é monitorado
+  DE.AE: Análise de Eventos Adversos
+    - Anomalias e eventos potenciais são analisados
+    - Eventos são correlacionados de múltiplas fontes
+
+Perguntas de Avaliação para a MedDefense:
+  - Existe um SIEM ou logging centralizado?
+  - Anomalias de tráfego de rede são detectadas?
+  - Alertas são investigados e correlacionados?
+  - Existe capacidade de monitoramento 24/7?
+
+========================================================================
+FUNÇÃO 5: RESPOND (RS)
+========================================================================
+Propósito: Tomar ação em relação a incidentes de cibersegurança
+detectados.
+
+Categorias-Chave:
+  RS.MA: Gestão de Incidentes
+    - Incidentes são triados, escalados e resolvidos
+    - O plano de resposta a incidentes é executado
+  RS.AN: Análise de Incidentes
+    - A investigação determina escopo e impacto
+    - Perícia forense é realizada
+  RS.CO: Relato e Comunicação de Incidentes
+    - Partes interessadas internas e externas são notificadas
+  RS.MI: Mitigação de Incidentes
+    - Ações são tomadas para conter e erradicar incidentes
+
+Perguntas de Avaliação para a MedDefense:
+  - Existe um plano de resposta a incidentes?
+  - O plano de RI já foi testado?
+  - Procedimentos de comunicação estão definidos para notificação de
+    violação?
+  - A MedDefense consegue conter um incidente ativo?
+
+========================================================================
+FUNÇÃO 6: RECOVER (RC)
+========================================================================
+Propósito: Restaurar ativos e operações afetados por incidentes de
+cibersegurança.
+
+Categorias-Chave:
+  RC.RP: Execução do Plano de Recuperação de Incidentes
+    - O plano de recuperação é executado durante ou após um incidente
+  RC.CO: Comunicação de Recuperação de Incidentes
+    - Atividades de recuperação são comunicadas às partes interessadas
+
+Perguntas de Avaliação para a MedDefense:
+  - Os backups são testados e recuperáveis?
+  - A infraestrutura de backup está isolada da produção?
+  - A MedDefense consegue restaurar operações dentro dos RTOs
+    definidos?
+  - Existe um plano de continuidade de negócios?
+
+========================================================================
+          FIM DO RESUMO DE REFERÊNCIA DO CSF 2.0
+========================================================================

@@ -1,0 +1,205 @@
+================================================================================
+          CIS CONTROLS v8 -- RESUMO DE REFERÊNCIA
+          Grupos de Implementação: IG1 (Essencial), IG2 (Fundamental)
+          Compilado para o Projeto 0x03: The Defense Blueprint
+================================================================================
+
+ESTRUTURA:
+  18 Controles, cada um contendo múltiplas Salvaguardas
+  IG1: 56 salvaguardas (linha de base mínima para TODAS as organizações)
+  IG2: 74 salvaguardas adicionais (para organizações com risco moderado)
+  IG3: 23 salvaguardas adicionais (para organizações com ameaças
+       avançadas)
+
+  Meta da MedDefense: IG1 totalmente implementado, IG2 parcialmente
+  implementado
+
+========================================================================
+CONTROLE 1: Inventário e Controle de Ativos Corporativos
+========================================================================
+  Salvaguardas IG1:
+    1.1 Estabelecer e manter um inventário detalhado de ativos
+        corporativos
+    1.2 Endereçar ativos não autorizados (remover, colocar em
+        quarentena, ou documentar)
+  Pergunta-Chave: Você conhece cada dispositivo na sua rede?
+
+CONTROLE 2: Inventário e Controle de Ativos de Software
+========================================================================
+  Salvaguardas IG1:
+    2.1 Estabelecer e manter um inventário de software
+    2.2 Garantir que o software autorizado tenha suporte atual
+    2.3 Endereçar software não autorizado
+  Pergunta-Chave: Você conhece cada aplicação rodando no seu ambiente?
+
+CONTROLE 3: Proteção de Dados
+========================================================================
+  Salvaguardas IG1:
+    3.1 Estabelecer e manter um processo de gestão de dados
+    3.2 Estabelecer e manter um inventário de dados
+    3.3 Configurar listas de controle de acesso a dados
+    3.4 Aplicar retenção de dados
+    3.6 Criptografar dados em dispositivos de usuário final
+  Pergunta-Chave: Os dados sensíveis são classificados, controlados e
+  criptografados?
+
+CONTROLE 4: Configuração Segura de Ativos Corporativos e Software
+========================================================================
+  Salvaguardas IG1:
+    4.1 Estabelecer e manter um processo de configuração segura
+    4.2 Estabelecer e manter configuração segura para infra de rede
+    4.3 Configurar bloqueio automático de sessão em ativos corporativos
+    4.4 Implementar e gerenciar um firewall em servidores
+    4.5 Implementar e gerenciar um firewall em dispositivos de usuário
+        final
+    4.6 Gerenciar com segurança ativos corporativos e software
+    4.7 Gerenciar contas padrão em ativos corporativos e software
+  Pergunta-Chave: Os sistemas são endurecidos além das configurações
+  padrão?
+
+CONTROLE 5: Gestão de Contas
+========================================================================
+  Salvaguardas IG1:
+    5.1 Estabelecer e manter um inventário de contas
+    5.2 Usar senhas únicas
+    5.3 Desabilitar contas inativas (após 45 dias)
+    5.4 Restringir privilégios de administrador a contas dedicadas
+  Pergunta-Chave: Todas as contas são inventariadas, únicas e
+  monitoradas?
+
+CONTROLE 6: Gestão de Controle de Acesso
+========================================================================
+  Salvaguardas IG1:
+    6.1 Estabelecer um processo de concessão de acesso
+    6.2 Estabelecer um processo de revogação de acesso
+    6.3 Exigir MFA para aplicações expostas externamente
+    6.4 Exigir MFA para acesso remoto à rede
+    6.5 Exigir MFA para acesso administrativo
+  Pergunta-Chave: O acesso é controlado, revogado a tempo, e o MFA é
+  aplicado?
+
+CONTROLE 7: Gestão Contínua de Vulnerabilidades
+========================================================================
+  Salvaguardas IG1:
+    7.1 Estabelecer e manter um processo de gestão de vulnerabilidades
+    7.2 Estabelecer e manter um processo de remediação
+    7.3 Realizar gestão automatizada de patches de SO
+    7.4 Realizar gestão automatizada de patches de aplicação
+  Pergunta-Chave: As vulnerabilidades são identificadas, priorizadas e
+  corrigidas?
+
+CONTROLE 8: Gestão de Logs de Auditoria
+========================================================================
+  Salvaguardas IG1:
+    8.1 Estabelecer e manter um processo de gestão de logs de auditoria
+    8.2 Coletar logs de auditoria
+    8.3 Garantir armazenamento adequado de logs de auditoria
+  Pergunta-Chave: Eventos relevantes de segurança são registrados e
+  retidos?
+
+CONTROLE 9: Proteções de E-mail e Navegador Web
+========================================================================
+  Salvaguardas IG1:
+    9.1 Garantir uso apenas de navegadores e clientes de e-mail
+        totalmente suportados
+    9.2 Usar serviços de filtragem DNS
+  Pergunta-Chave: Os vetores de ataque de e-mail e navegador são
+  mitigados?
+
+CONTROLE 10: Defesas Contra Malware
+========================================================================
+  Salvaguardas IG1:
+    10.1 Implantar e manter software anti-malware
+    10.2 Configurar atualizações automáticas de assinatura anti-malware
+    10.3 Desabilitar autorun e autoplay para mídia removível
+  Pergunta-Chave: Os endpoints estão protegidos contra malware?
+
+CONTROLE 11: Recuperação de Dados
+========================================================================
+  Salvaguardas IG1:
+    11.1 Estabelecer e manter um processo de recuperação de dados
+    11.2 Realizar backups automatizados
+    11.3 Proteger dados de recuperação (isolar ou criptografar)
+    11.4 Estabelecer e manter uma instância isolada de dados de
+         recuperação
+  Pergunta-Chave: Você consegue se recuperar de perda de dados? Os
+  backups estão isolados?
+
+CONTROLE 12: Gestão de Infraestrutura de Rede
+========================================================================
+  Salvaguardas IG1:
+    12.1 Garantir que a infraestrutura de rede esteja atualizada
+  Salvaguardas IG2:
+    12.2 Estabelecer e manter uma arquitetura de rede segura
+    12.3 Gerenciar com segurança a infraestrutura de rede
+    12.4 Estabelecer e manter diagramas de arquitetura
+    12.5 Centralizar autenticação, autorização e registro de rede
+    12.6 Usar protocolos seguros de gestão e comunicação de rede
+    12.7 Garantir que dispositivos remotos usem VPN e DNS gerenciado
+    12.8 Estabelecer e manter recursos de computação dedicados para
+         administração
+  Pergunta-Chave: A arquitetura de rede é segura e segmentada?
+
+CONTROLE 13: Monitoramento e Defesa de Rede
+========================================================================
+  Salvaguardas IG2:
+    13.1 Centralizar alertas de eventos de segurança
+    13.3 Implantar uma solução de detecção de intrusão de rede
+    13.6 Coletar logs de fluxo de tráfego de rede
+    13.8 Implantar uma solução de prevenção de intrusão de rede
+  Pergunta-Chave: Anomalias e intrusões de rede são detectadas?
+
+CONTROLE 14: Conscientização e Treinamento em Segurança
+========================================================================
+  Salvaguardas IG1:
+    14.1 Estabelecer e manter um programa de conscientização em
+         segurança
+    14.2 Treinar a força de trabalho para reconhecer ataques de
+         engenharia social
+    14.3 Treinar a força de trabalho em boas práticas de autenticação
+    14.4 Treinar a força de trabalho em boas práticas de manuseio de
+         dados
+    14.5 Treinar a força de trabalho sobre causas de exposição não
+         intencional de dados
+    14.6 Treinar a força de trabalho a reconhecer e relatar incidentes
+         de segurança
+  Pergunta-Chave: Todos os usuários são treinados para reconhecer e
+  responder a ameaças?
+
+CONTROLE 15: Gestão de Provedores de Serviço
+========================================================================
+  Salvaguardas IG1:
+    15.1 Estabelecer e manter um inventário de provedores de serviço
+    15.2 Estabelecer e manter uma política de gestão de provedores de
+         serviço
+  Pergunta-Chave: Os provedores terceirizados são inventariados e
+  gerenciados?
+
+CONTROLE 16: Segurança de Software de Aplicação
+========================================================================
+  Salvaguardas IG2:
+    16.1 Estabelecer e manter um processo seguro de desenvolvimento de
+         aplicações
+    16.9 Treinar desenvolvedores em segurança de aplicações
+  Pergunta-Chave: O software desenvolvido internamente é seguro?
+
+CONTROLE 17: Gestão de Resposta a Incidentes
+========================================================================
+  Salvaguardas IG1:
+    17.1 Designar pessoal para gerenciar o tratamento de incidentes
+    17.2 Estabelecer e manter informações de contato para relato
+    17.3 Estabelecer e manter um processo corporativo de relato
+  Pergunta-Chave: A organização consegue responder a um incidente de
+  segurança?
+
+CONTROLE 18: Teste de Penetração
+========================================================================
+  Salvaguardas IG2:
+    18.1 Estabelecer e manter um programa de teste de penetração
+    18.2 Realizar testes de penetração externos periódicos
+    18.3 Corrigir achados do teste de penetração
+  Pergunta-Chave: A organização está testando suas próprias defesas?
+
+========================================================================
+          FIM DO RESUMO DO CIS CONTROLS v8
+========================================================================

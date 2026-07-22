@@ -1,0 +1,149 @@
+================================================================================
+          CENÁRIOS DE RISCO PARA ANÁLISE QUANTITATIVA
+          MedDefense Health Systems
+          Propósito: Praticar o cálculo de SLE, ARO e ALE
+================================================================================
+
+========================================================================
+CENÁRIO 1: Ataque de Ransomware ao Servidor de Faturamento
+========================================================================
+
+Ativo: billing-srv-01 (Ubuntu 18.04, Apache 2.4.29, MySQL)
+Ameaça: Grupo de ransomware estilo BlackReef (do perfil do 1x01)
+
+Dados de Apoio:
+  - O billing-srv-01 processa $4,2 milhões em transações de receita/ano
+  - O servidor também armazena 3 anos de registros financeiros
+  - Tempo médio de inatividade hospitalar após ransomware: 18 dias
+    (dados da CISA)
+  - Receita diária da MedDefense atribuída às operações de
+    faturamento: ~$16.000
+  - Estimativa de custo de recuperação (perícia forense, reconstrução,
+    suporte de fornecedor): $85.000
+  - Multa HIPAA por violação de dados financeiros/de pacientes:
+    $50.000-$250.000 (assuma $100.000 como multa de faixa
+    intermediária)
+  - Taxa setorial de ransomware para hospitais de perfil similar:
+    aproximadamente 1 ataque a cada 3-4 anos (do dossiê de
+    inteligência do 1x01)
+
+Sua Tarefa: Calcule AV, EF, SLE, ARO e ALE.
+Dica: O EF depende de quanto do valor do ativo é perdido. Pense se o
+servidor em si é destruído ou se o custo real é inatividade +
+recuperação + multas.
+
+========================================================================
+CENÁRIO 2: Violação de Dados de Pacientes via Sistema EHR
+========================================================================
+
+Ativo: Sistema EHR (ehr-srv-01 + ehr-db-01)
+Ameaça: Exfiltração de dados (atacante externo ou insider malicioso)
+
+Dados de Apoio:
+  - O EHR contém aproximadamente 50.000 registros de pacientes
+  - Custo por registro de saúde violado: $165 (Ponemon 2024)
+    * Isso inclui detecção, notificação, jurídico e perda de negócios
+  - Custos de Notificação de Violação HIPAA: $25.000 (fixo, para
+    infraestrutura de notificação e monitoramento de crédito)
+  - Exposição de litígio estimada: $200.000
+  - Impacto reputacional: estimativa de 5% de atrito de pacientes ao
+    longo de 2 anos, valendo aproximadamente $600.000 em receita
+    perdida
+  - Probabilidade de violação afetando um hospital sem SIEM, rede
+    plana, e sistemas não corrigidos: estime 1 em 3 anos com base em
+    dados do setor (o portal de violações do HHS mostra 1.247
+    violações em 24 meses em ~6.000 hospitais, mas a MedDefense tem
+    risco maior que a média)
+
+Sua Tarefa: Calcule AV, EF, SLE, ARO e ALE.
+Dica: O AV aqui não é o custo de reposição do servidor. É o custo
+total da violação. O EF pode estar perto de 100% porque um evento de
+violação dispara todos os custos associados.
+
+========================================================================
+CENÁRIO 3: Roubo de Dados por Insider (Negligente)
+========================================================================
+
+Ativo: Dados de pacientes acessíveis via estações clínicas
+Ameaça: Insider negligente (do 1x01 T3, cenários 1 e 5)
+
+Dados de Apoio:
+  - A MedDefense tem aproximadamente 280 estações clínicas com acesso
+    ao EHR e sem DLP ou restrição de USB
+  - Custo médio de incidente de insider negligente em saúde: $120.000
+    (Relatório Ponemon de Ameaça Interna)
+  - Isso inclui investigação ($30.000), contenção ($25.000),
+    remediação ($40.000), e relato regulatório ($25.000)
+  - Incidentes de insider negligente respondem por 60% dos eventos de
+    insider em saúde (suplemento de saúde do Verizon DBIR)
+  - Com 2.000 funcionários, estime 2-3 incidentes negligentes por ano
+    com base em médias setoriais e na falta de controles da MedDefense
+    (sem DLP, sem restrição de USB, contas compartilhadas, sem
+    programa de treinamento de segurança)
+
+Sua Tarefa: Calcule AV, EF, SLE, ARO e ALE.
+Dica: O ARO aqui pode ser maior que 1.
+
+========================================================================
+CENÁRIO 4: Comprometimento de Dispositivo Médico
+========================================================================
+
+Ativo: Bombas de infusão BD Alaris (7 unidades) + rede
+Ameaça: Atacante oportunista explorando credenciais padrão e acesso
+        via rede plana (do Achado 010 do 1x02)
+
+Dados de Apoio:
+  - Custo de reposição por bomba de infusão: $15.000 (x7 = $105.000)
+  - No entanto, o risco primário não é a destruição do dispositivo. É:
+    * Incidente de segurança do paciente: responsabilidade potencial
+      de $500.000-$5.000.000
+    * Custos de investigação da FDA: $150.000
+    * Interrupção operacional (mudança para dosagem manual):
+      $20.000/dia por estimados 5 dias enquanto os dispositivos estão
+      em quarentena
+  - Probabilidade: baixa para ataque direcionado a dispositivos
+    médicos, mas a rede plana e as credenciais padrão tornam o
+    comprometimento oportunista plausível. Estime 1 em 10 anos para um
+    evento de negação de serviço, 1 em 50 anos para um evento de
+    segurança do paciente.
+
+Sua Tarefa: Calcule AV, EF, SLE, ARO e ALE.
+Dica: Você pode querer calcular dois ALEs: um para o cenário de DoS e
+um para o cenário de segurança do paciente. O cenário de segurança do
+paciente tem ARO muito baixo mas impacto catastrófico.
+
+========================================================================
+CENÁRIO 5: Comprometimento de VPN Levando a Acesso Total à Rede
+========================================================================
+
+Ativo: Toda a rede interna da MedDefense (via VPN do FortiGate)
+Ameaça: Atacante externo explorando vulnerabilidade de VPN ou roubo de
+        credenciais (da kill chain #1 do 1x01 e achados OSINT do 1x02)
+
+Dados de Apoio:
+  - O FortiGate é o único dispositivo de perímetro para os 3 sites
+  - Um comprometimento de VPN dá ao atacante acesso à rede plana
+    10.10.0.0/16, alcançando cada servidor, estação de trabalho e
+    dispositivo médico
+  - Este é o ponto de entrada das kill chains #1 e #2 do 1x01
+  - Se explorado, o atacante pode alcançar: EHR (50.000 registros),
+    faturamento (dados financeiros), AD (todas as credenciais),
+    backups (não isolados)
+  - O impacto potencial total é o agregado dos Cenários 1 + 2
+  - Vulnerabilidades do FortiOS são divulgadas regularmente. A CISA já
+    emitiu múltiplas diretivas de emergência para CVEs do FortiGate.
+    A cadência de aplicação de patches da MedDefense para o FortiGate
+    é desconhecida (não coberta pelo scan).
+  - ARO estimado: 0.3 (uma vez a cada ~3 anos, com base na VPN sendo o
+    vetor de acesso inicial #1 em 38% dos ataques de ransomware em
+    saúde)
+
+Sua Tarefa: Calcule AV, EF, SLE, ARO e ALE.
+Dica: O AV para este cenário é difícil porque é o "portão de entrada"
+para tudo. Considere: qual é a perda agregada máxima se um atacante
+entra pela VPN e executa uma campanha completa de ransomware +
+exfiltração de dados?
+
+========================================================================
+          FIM DOS CENÁRIOS DE RISCO
+========================================================================
