@@ -1,0 +1,205 @@
+================================================================================
+          MEDDEFENSE HEALTH SYSTEMS
+          Notas de Auditoria Criptográfica
+          Preparado por: Sarah Park (Diretora de TI)
+          Data: [Semana 5, Dia 1]
+          Objetivo: Inventário do estado atual de criptografia em todos os sistemas
+          Status: Notas de trabalho, não é uma avaliação formal
+================================================================================
+
+NOTAS DE SARAH PARK:
+
+O James me pediu pra documentar o que a gente criptografa hoje e o
+que não criptografa. Passei por todos os sistemas e serviços
+principais. Uma parte disso eu já sabia. Outra parte... eu queria
+não saber.
+
+========================================================================
+DADOS DE PACIENTES (Sistema EHR: ehr-srv-01 / ehr-db-01)
+========================================================================
+
+Banco de dados: PostgreSQL 14 no ehr-db-01
+  Criptografia em repouso: NENHUMA. O diretório de dados do
+  PostgreSQL fica num filesystem ext4 sem nenhuma camada de
+  criptografia. Se alguém consegue root no servidor (ou tira o
+  disco), todo prontuário de paciente fica legível em texto puro.
+
+  Criptografia em trânsito: PARCIAL. A aplicação EHR (ehr-srv-01)
+  se conecta ao banco (ehr-db-01) pela rede local. O PostgreSQL
+  está configurado com ssl=on, mas o pg_hba.conf permite conexões
+  sem SSL a partir da faixa 10.10.0.0/16 (existem linhas
+  "hostnossl" junto com linhas "hostssl"). Isso significa que a
+  aplicação PODE se conectar sem criptografia, e a gente não tem
+  como confirmar quais conexões estão criptografadas e quais não.
+
+  Criptografia em uso: NENHUMA. Quando um clínico visualiza um
+  prontuário, ele é descriptografado na memória do ehr-srv-01 e
+  transmitido pro navegador. Não existe proteção adicional pros
+  dados sendo processados ativamente. As estações de trabalho do
+  posto de enfermagem não travam automaticamente (o timeout de
+  screensaver está configurado como "Nunca" na Política de Grupo).
+
+========================================================================
+DADOS FINANCEIROS (Faturamento: billing-srv-01)
+========================================================================
+
+Banco de dados: MySQL no billing-srv-01
+  Criptografia em repouso: NENHUMA. Mesma situação do PostgreSQL.
+  O diretório de dados do MySQL fica num filesystem ext4 sem
+  criptografia. O banco de faturamento contém: nomes de pacientes,
+  datas de nascimento, CPFs (SSNs), números de apólice de seguro,
+  últimos 4 dígitos de cartão de crédito, e 3 anos de registros de
+  cobrança.
+
+  NOTA do incidente do crypto-miner (1x00): durante a revisão
+  forense depois que o crypto-miner foi encontrado no
+  billing-srv-01, o responsável pelo incidente observou que todos
+  os arquivos do banco eram legíveis diretamente pelo filesystem
+  sem precisar de credenciais do MySQL. Isso significa que o
+  operador do crypto-miner PODERIA ter exfiltrado os dados de
+  faturamento, embora não haja evidência de que isso tenha
+  acontecido.
+
+  Criptografia em trânsito: FRACA. O MySQL está vinculado a
+  0.0.0.0 e não exige SSL pras conexões. A aplicação de
+  faturamento se conecta via protocolo MySQL em texto puro pela
+  rede plana.
+
+========================================================================
+IMAGENS MÉDICAS (PACS: pacs-srv-01)
+========================================================================
+
+Tráfego DICOM: NENHUM. Imagens médicas (ressonância, tomografia,
+raio-X) são transmitidas entre a estação de ressonância (Windows
+XP), as estações de radiologia e o servidor PACS usando o
+protocolo DICOM nas portas 4242 e 11112. O DICOM tem suporte a TLS
+(DICOM TLS, definido no DICOM PS3.15), mas isso não está
+configurado em nenhum sistema da MedDefense. Todo dado de imagem,
+incluindo identificadores de paciente embutidos nos cabeçalhos
+DICOM (nome, data de nascimento, prontuário, descrição do exame),
+atravessa a rede em texto puro.
+
+Armazenamento: NENHUM. O PACS armazena imagens em disco local sem
+criptografia. Os arquivos DICOM contêm identificadores de paciente
+embutidos que são legíveis com qualquer visualizador DICOM ou até
+com um editor de texto (o cabeçalho é parcialmente texto puro).
+
+========================================================================
+CREDENCIAIS (Active Directory: ad-dc-01 / ad-dc-02)
+========================================================================
+
+Armazenamento de senhas: O Active Directory usa NTHash (MD4) por
+padrão pra compatibilidade com NTLM. Os controladores de domínio
+também suportam autenticação Kerberos com os tipos de criptografia
+AES-256, AES-128, RC4 e DES.
+
+O Finding 018 da varredura de vulnerabilidades confirmou que DES e
+RC4 ainda estão habilitados. Isso significa:
+  1. Ataques de Kerberoasting podem solicitar tickets de serviço
+     criptografados com RC4 e quebrá-los offline (o RC4 usa
+     MD4/MD5 internamente).
+  2. O DES é trivialmente quebrável e deveria ter sido desabilitado
+     há anos.
+  3. A única razão pra esses ainda estarem habilitados é
+     "compatibilidade legada", mas ninguém documentou quais sistemas
+     realmente precisam deles.
+
+LDAP: Não é criptografado por padrão. O Finding 007 da varredura
+confirmou que a assinatura LDAP não é exigida nos controladores de
+domínio.
+
+========================================================================
+DADOS DE BACKUP (NAS-01)
+========================================================================
+
+Criptografia: NENHUMA. O NAS Synology armazena todos os dados de
+backup num array RAID-5 sem nenhuma camada de criptografia. A
+interface de gerenciamento do NAS (DSM) é acessível pela rede plana
+(Finding 015 da varredura).
+
+Se o NAS for comprometido (o que nossas kill chains mostraram ser
+um passo chave no cenário de ransomware), todo backup, incluindo
+os dumps de banco do PostgreSQL e do MySQL, fica legível em texto
+puro.
+
+O NAS suporta o recurso nativo do Synology de "criptografia de
+pasta compartilhada" (AES-256-CBC com a chave guardada no...
+gerenciador de chaves do próprio NAS). A gente não habilitou isso.
+Nota da Sarah: "Se a gente criptografa os backups no NAS e a chave
+fica guardada no NAS, e o ransomware criptografa o NAS, a gente
+perde tanto os backups QUANTO a chave. Isso precisa ser projetado
+direito."
+
+========================================================================
+E-MAIL (O365)
+========================================================================
+
+A Microsoft cuida da criptografia do O365:
+  Em trânsito: TLS 1.2 pra todas as conexões do Exchange Online
+  (a Microsoft passou a exigir isso em 2023).
+  Em repouso: BitLocker nos discos do datacenter da Microsoft +
+  criptografia por caixa de correio (chaves gerenciadas pela
+  Microsoft).
+  S/MIME ou OME: Não configurado. A MedDefense não usa
+  criptografia de e-mail pra mensagens individuais. Informação
+  sensível de paciente às vezes é enviada por e-mail entre
+  médicos em texto puro. Nota da Sarah: "Eu já falei pra eles não
+  mandarem PHI por e-mail. Eles fazem assim mesmo."
+
+========================================================================
+TRÁFEGO DE VPN (Túneis Site-a-Site)
+========================================================================
+
+Central para Westside: túnel IPSec pelo FortiGate.
+  Criptografia: AES-256 com SHA-256 pra integridade.
+  Troca de chaves: IKEv2 com DH Group 14.
+  Status: Parece adequado, com base na configuração do FortiGate.
+
+Central para a Sede: túnel IPSec pelo FortiGate.
+  Mesma configuração acima.
+
+NOTA: O roteador doméstico da Westside (Netgear Nighthawk) termina
+uma das pontas do túnel de VPN. O histórico de atualização de
+firmware desse aparelho é desconhecido. Se a implementação IPSec
+do roteador tiver uma vulnerabilidade, a criptografia do túnel pode
+estar comprometida independente da força do algoritmo.
+
+========================================================================
+PORTAL DO PACIENTE (web-srv-01)
+========================================================================
+
+TLS: FRACO. O Finding 005 da varredura de vulnerabilidades
+confirmou:
+  Suportados: TLS 1.0 e TLS 1.2
+  TLS 1.0 é vulnerável a BEAST, POODLE, Lucky Thirteen
+  TLS 1.3: Não suportado
+  HSTS: Não configurado
+  OCSP Stapling: Não configurado
+
+Certificado: O Finding 013 confirmou que o certificado SSL expira
+em 23 dias (agora 18 dias, nesta semana). A renovação automática
+não está configurada. O certificado é emitido pelo Let's Encrypt
+com validade de 90 dias.
+
+Conjuntos de cifras: Não documentados. Está em uso a configuração
+padrão do Apache, que provavelmente inclui conjuntos de cifras
+fracos junto com fortes.
+
+========================================================================
+RESUMO DA SARAH
+========================================================================
+
+"Resumindo: a gente não criptografa quase nada do que controla. A
+Microsoft cuida da criptografia de e-mail pra gente. Os túneis de
+VPN são criptografados (mas uma ponta é um roteador doméstico).
+Todo o resto — o banco de dados de pacientes, o banco de
+faturamento, as imagens médicas, os backups, a autenticação do
+Active Directory, o portal do paciente — ou não está criptografado
+ou está usando protocolos quebrados.
+
+A estratégia de segurança diz 'implementar criptografia.' Essa
+auditoria mostra exatamente onde. Agora é com vocês."
+
+================================================================================
+                    FIM DAS NOTAS DE AUDITORIA CRIPTOGRÁFICA
+================================================================================
