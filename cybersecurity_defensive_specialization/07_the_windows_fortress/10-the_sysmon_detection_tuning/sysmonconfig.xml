@@ -1,0 +1,121 @@
+<!--
+    sysmonconfig.xml
+    MedDefense Health Systems - Windows Fortress (2x01 Task 10)
+
+    Task 9's baseline (SwiftOnSecurity-structured: exclude known-noisy
+    legitimate activity, include everything else by default) with the
+    "MedDefense Custom Detections" RuleGroup appended by 10-sysmon_tune.ps1:
+    5 rules targeting Crimson Tide-specific tooling (Rclone exfiltration,
+    PsExec service install, encoded PowerShell, vssadmin shadow-copy
+    deletion, scheduled-task persistence). This file is the output of
+    running 10-sysmon_tune.ps1 against Task 9's sysmonconfig.xml - do not
+    hand-edit; re-run the script to regenerate it.
+-->
+<Sysmon schemaversion="4.90">
+  <HashAlgorithms>SHA256</HashAlgorithms>
+  <CheckRevocation />
+  <DnsLookup>false</DnsLookup>
+  <EventFiltering>
+    <!-- Event ID 1: Process creation - log everything, exclude console noise -->
+    <ProcessCreate onmatch="exclude">
+      <Image condition="end with">\WmiPrvSE.exe</Image>
+      <Image condition="end with">\conhost.exe</Image>
+      <ParentImage condition="end with">\services.exe</ParentImage>
+    </ProcessCreate>
+    <!-- Event ID 2: A process changed a file creation time (timestomping) -->
+    <FileCreateTime onmatch="exclude">
+      <Image condition="end with">\chrome.exe</Image>
+      <Image condition="end with">\firefox.exe</Image>
+    </FileCreateTime>
+    <!-- Event ID 3: Network connection - exclude high-volume, low-value system noise -->
+    <NetworkConnect onmatch="exclude">
+      <Image condition="end with">\svchost.exe</Image>
+      <DestinationPort condition="is">137</DestinationPort>
+      <DestinationPort condition="is">138</DestinationPort>
+    </NetworkConnect>
+    <!-- Event ID 5: Process terminated -->
+    <ProcessTerminate onmatch="exclude">
+      <Image condition="end with">\conhost.exe</Image>
+    </ProcessTerminate>
+    <!-- Event ID 6: Driver loaded - log all, Microsoft-signed drivers rarely matter -->
+    <DriverLoad onmatch="exclude">
+      <Signature condition="contains">Microsoft Windows</Signature>
+    </DriverLoad>
+    <!-- Event ID 7: Image/DLL loaded - very high volume, scoped to sensitive processes only -->
+    <ImageLoad onmatch="include">
+      <TargetImage condition="end with">\lsass.exe</TargetImage>
+      <TargetImage condition="end with">\winlogon.exe</TargetImage>
+    </ImageLoad>
+    <!-- Event ID 8: CreateRemoteThread - classic injection technique -->
+    <CreateRemoteThread onmatch="exclude">
+      <SourceImage condition="end with">\WmiPrvSE.exe</SourceImage>
+    </CreateRemoteThread>
+    <!-- Event ID 9: RawAccessRead - direct disk reads, common in credential dumping -->
+    <RawAccessRead onmatch="exclude">
+      <Image condition="end with">\System</Image>
+    </RawAccessRead>
+    <!-- Event ID 10: ProcessAccess - handle requests to sensitive processes (LSASS = credential theft) -->
+    <ProcessAccess onmatch="include">
+      <TargetImage condition="end with">\lsass.exe</TargetImage>
+    </ProcessAccess>
+    <!-- Event ID 11: FileCreate - ransomware note drops, staged exfil archives -->
+    <FileCreate onmatch="exclude">
+      <TargetFilename condition="contains">\AppData\Local\Temp\</TargetFilename>
+      <TargetFilename condition="end with">.tmp</TargetFilename>
+    </FileCreate>
+    <!-- Event ID 12/13/14: Registry create/set/rename - persistence keys -->
+    <RegistryEvent onmatch="include">
+      <TargetObject condition="contains">\CurrentVersion\Run</TargetObject>
+      <TargetObject condition="contains">\CurrentVersion\RunOnce</TargetObject>
+      <TargetObject condition="contains">\Services\</TargetObject>
+    </RegistryEvent>
+    <!-- Event ID 15: FileCreateStreamHash - alternate data streams (download-of-origin marker) -->
+    <FileCreateStreamHash onmatch="exclude">
+      <Image condition="end with">\chrome.exe</Image>
+    </FileCreateStreamHash>
+    <!-- Event ID 17/18: Named pipe created/connected - lateral movement (PsExec uses named pipes) -->
+    <PipeEvent onmatch="exclude">
+      <PipeName condition="begin with">\lsass</PipeName>
+    </PipeEvent>
+    <!-- Event ID 19/20/21: WMI event filter/consumer/binding - fileless persistence -->
+    <WmiEvent onmatch="exclude">
+      <Operation condition="is">N/A</Operation>
+    </WmiEvent>
+    <!-- Event ID 22: DNS query - C2 beaconing, DGA domains -->
+    <DnsQuery onmatch="exclude">
+      <QueryName condition="end with">.microsoft.com</QueryName>
+      <QueryName condition="end with">.windowsupdate.com</QueryName>
+    </DnsQuery>
+    <!-- Event ID 23: FileDelete (archived) - anti-forensic cleanup -->
+    <FileDelete onmatch="exclude">
+      <Image condition="end with">\chrome.exe</Image>
+    </FileDelete>
+    <!-- Event ID 25: ProcessTampering - hollowing/herpaderping detection -->
+    <ProcessTampering onmatch="exclude">
+      <Type condition="is">N/A</Type>
+    </ProcessTampering>
+    <RuleGroup name="MedDefense Custom Detections" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <Rule name="MedDefense_Rclone_Exfiltration" groupRelation="or">
+          <Image condition="end with">\rclone.exe</Image>
+        </Rule>
+        <Rule name="MedDefense_EncodedPowerShell" groupRelation="or">
+          <CommandLine condition="contains">-enc</CommandLine>
+        </Rule>
+        <Rule name="MedDefense_VssadminShadowDelete" groupRelation="and">
+          <Image condition="end with">\vssadmin.exe</Image>
+          <CommandLine condition="contains">delete shadows</CommandLine>
+        </Rule>
+        <Rule name="MedDefense_ScheduledTaskPersistence" groupRelation="and">
+          <Image condition="end with">\schtasks.exe</Image>
+          <CommandLine condition="contains">/create</CommandLine>
+        </Rule>
+      </ProcessCreate>
+      <RegistryEvent onmatch="include">
+        <Rule name="MedDefense_PsExec_ServiceInstall" groupRelation="or">
+          <TargetObject condition="contains">\Services\PSEXESVC</TargetObject>
+        </Rule>
+      </RegistryEvent>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>

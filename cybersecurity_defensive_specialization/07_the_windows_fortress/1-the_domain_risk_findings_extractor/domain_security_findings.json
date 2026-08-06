@@ -1,0 +1,248 @@
+{
+  "generated": "2026-08-05T09:20:41Z",
+  "domain": "meddefense.local",
+  "targetState": {
+    "minPasswordLength": 14,
+    "complexityEnabled": true,
+    "historyCount": 24,
+    "lockoutThreshold": 5,
+    "staleDays": 90
+  },
+  "findings": [
+    {
+      "id": "FND-001",
+      "severity": "Critical",
+      "category": "Password Policy",
+      "asset": "Default Domain Password Policy",
+      "evidence": [
+        "MinPasswordLength=7 (target: 14)",
+        "ComplexityEnabled=False (target: True)",
+        "PasswordHistoryCount=0 (target: 24)"
+      ],
+      "risk": "Weak, reused and never-rotated passwords are the primary credential-harvesting vector documented in all 5 Crimson Tide breaches (1x05).",
+      "recommended_remediation": "Deploy the 'MedDefense - Password and Lockout Policy' GPO enforcing 14-char minimum, complexity, and 24-password history.",
+      "mapped_task": "4-password_policy.ps1"
+    },
+    {
+      "id": "FND-002",
+      "severity": "Critical",
+      "category": "Account Lockout",
+      "asset": "Default Domain Password Policy",
+      "evidence": [
+        "LockoutThreshold=0 (target: 5)",
+        "LockoutDuration=00:00:00",
+        "LockoutObservationWindow=00:00:00"
+      ],
+      "risk": "No account lockout means unlimited password-spray and brute-force attempts against every one of the 14 domain accounts.",
+      "recommended_remediation": "Deploy the 'MedDefense - Password and Lockout Policy' GPO with a 5-attempt threshold and 15-minute lockout/reset window.",
+      "mapped_task": "4-password_policy.ps1"
+    },
+    {
+      "id": "FND-003",
+      "severity": "Critical",
+      "category": "Kerberos Hardening",
+      "asset": "Domain Kerberos policy (krbtgt baseline)",
+      "evidence": "Supported encryption types: DES, RC4, AES128, AES256",
+      "risk": "RC4/DES tickets are trivially crackable offline, enabling Kerberoasting and AS-REP roasting - the exact technique Crimson Tide Phase 3 (Lateral Movement) used for privilege escalation.",
+      "recommended_remediation": "Restrict 'Network security: Configure encryption types allowed for Kerberos' to AES128/AES256 only via GPO.",
+      "mapped_task": "pending: Kerberos encryption hardening task (not yet assigned)"
+    },
+    {
+      "id": "FND-004",
+      "severity": "High",
+      "category": "Account Lifecycle",
+      "asset": "6 user accounts",
+      "evidence": [
+        {
+          "name": "Administrator",
+          "samAccountName": "Administrator",
+          "enabled": true,
+          "passwordLastSet": "2025-11-02T00:00:00Z",
+          "groupMemberships": [
+            "Domain Admins",
+            "Enterprise Admins",
+            "Domain Users"
+          ],
+          "isServiceAccount": false
+        },
+        {
+          "name": "James Chen",
+          "samAccountName": "j.chen",
+          "enabled": true,
+          "passwordLastSet": "2025-09-30T00:00:00Z",
+          "groupMemberships": [
+            "G_IT_Admins",
+            "Domain Users"
+          ],
+          "isServiceAccount": false
+        },
+        {
+          "name": "Sarah Park",
+          "samAccountName": "s.park",
+          "enabled": true,
+          "passwordLastSet": "2025-10-11T00:00:00Z",
+          "groupMemberships": [
+            "G_IT_Admins",
+            "Domain Users"
+          ],
+          "isServiceAccount": false
+        },
+        {
+          "name": "Marcus Webb",
+          "samAccountName": "m.webb",
+          "enabled": false,
+          "passwordLastSet": "2024-12-01T00:00:00Z",
+          "groupMemberships": [
+            "G_IT_Admins",
+            "Domain Users"
+          ],
+          "isServiceAccount": false
+        },
+        {
+          "name": "Rosa Diaz",
+          "samAccountName": "r.diaz",
+          "enabled": true,
+          "passwordLastSet": "2025-08-19T00:00:00Z",
+          "groupMemberships": [
+            "G_Clinical_Staff",
+            "Domain Users"
+          ],
+          "isServiceAccount": false
+        },
+        {
+          "name": "Diego Romero",
+          "samAccountName": "d.romero",
+          "enabled": true,
+          "passwordLastSet": "2025-07-07T00:00:00Z",
+          "groupMemberships": [
+            "G_Billing_Staff",
+            "Domain Users"
+          ],
+          "isServiceAccount": false
+        }
+      ],
+      "risk": "Passwords that never expire never rotate - a single leaked credential from any of these accounts stays valid indefinitely.",
+      "recommended_remediation": "Clear PasswordNeverExpires on every non-service account; move required service-account exceptions under a managed service account (gMSA) or documented compensating control.",
+      "mapped_task": "pending: account lifecycle remediation task (not yet assigned)"
+    },
+    {
+      "id": "FND-005",
+      "severity": "High",
+      "category": "Privileged Access",
+      "asset": "Domain Admins / Enterprise Admins / G_IT_Admins",
+      "evidence": [
+        {
+          "name": "Marcus Webb",
+          "group": "G_IT_Admins"
+        }
+      ],
+      "risk": "A disabled account left in a privileged group is a re-enablement target - if the attacker resets its password (or it is re-enabled by mistake), it grants immediate domain-level access.",
+      "recommended_remediation": "Remove disabled accounts from all privileged groups; disabling an account does not revoke its group memberships.",
+      "mapped_task": "pending: privileged group cleanup task (not yet assigned)"
+    },
+    {
+      "id": "FND-006",
+      "severity": "High",
+      "category": "Audit Visibility",
+      "asset": "Domain-wide audit policy and endpoint telemetry",
+      "evidence": [
+        "Process Creation: not configured",
+        "Special Logon: not configured",
+        "User Account Management: not configured",
+        "File System: not configured",
+        "Registry: not configured",
+        "PowerShell Script Block Logging: disabled",
+        "Sysmon: not installed"
+      ],
+      "risk": "Without process creation, account management and PowerShell logging, an attacker's actions after initial access generate zero evidence - exactly the blind spot Crimson Tide's affiliates relied on for lateral movement.",
+      "recommended_remediation": "Deploy the 'MedDefense - Advanced Audit Policy' GPO and roll out Sysmon with a detection-optimized configuration.",
+      "mapped_task": "5-audit_policy.ps1"
+    },
+    {
+      "id": "FND-007",
+      "severity": "High",
+      "category": "Service Account Hardening",
+      "asset": "3 service accounts",
+      "evidence": [
+        {
+          "name": "svc-backup",
+          "samAccountName": "svc-backup",
+          "unconstrainedDelegation": true,
+          "privilegedMembership": false,
+          "stalePassword": true,
+          "passwordAgeDays": 902,
+          "lastLogonDate": "2026-08-01T03:00:00Z"
+        },
+        {
+          "name": "svc-sql",
+          "samAccountName": "svc-sql",
+          "unconstrainedDelegation": true,
+          "privilegedMembership": false,
+          "stalePassword": true,
+          "passwordAgeDays": 979,
+          "lastLogonDate": "2026-08-05T03:00:00Z"
+        },
+        {
+          "name": "svc-web",
+          "samAccountName": "svc-web",
+          "unconstrainedDelegation": true,
+          "privilegedMembership": false,
+          "stalePassword": true,
+          "passwordAgeDays": 821,
+          "lastLogonDate": "2026-08-05T03:05:00Z"
+        }
+      ],
+      "risk": "Unconstrained delegation lets any process that compromises this account impersonate ANY domain user to ANY service, including Domain Admins - the single fastest path from a compromised service account to full domain compromise.",
+      "recommended_remediation": "Convert every service account to constrained delegation (or resource-based constrained delegation); migrate to gMSA where possible.",
+      "mapped_task": "pending: service account hardening task (not yet assigned)"
+    },
+    {
+      "id": "FND-008",
+      "severity": "Medium",
+      "category": "Stale Object Cleanup",
+      "asset": "2 computer objects",
+      "evidence": [
+        {
+          "Name": "MEDDEF-WS014",
+          "DistinguishedName": "CN=MEDDEF-WS014,OU=Workstations,DC=meddefense,DC=local",
+          "LastLogonDate": "2026-03-22T00:00:00Z"
+        },
+        {
+          "Name": "MEDDEF-WS231",
+          "DistinguishedName": "CN=MEDDEF-WS231,OU=Workstations,DC=meddefense,DC=local",
+          "LastLogonDate": null
+        }
+      ],
+      "risk": "Stale computer objects are unmonitored, frequently unpatched, and are a common target for AD persistence (resource-based constrained delegation abuse, SPN spoofing).",
+      "recommended_remediation": "Disable and, after a grace period, remove computer objects with no authentication activity in 90+ days.",
+      "mapped_task": "pending: stale object cleanup task (not yet assigned)"
+    },
+    {
+      "id": "FND-009",
+      "severity": "Medium",
+      "category": "GPO Hardening",
+      "asset": "2 GPO(s) linked in the domain",
+      "evidence": [
+        {
+          "DisplayName": "Default Domain Policy",
+          "CreationTime": "2025-01-15T10:00:00Z",
+          "ModificationTime": "2025-01-15T10:00:00Z"
+        },
+        {
+          "DisplayName": "Default Domain Controllers Policy",
+          "CreationTime": "2025-01-15T10:00:00Z",
+          "ModificationTime": "2025-01-15T10:00:00Z"
+        }
+      ],
+      "risk": "Default-only GPOs mean nothing enforces password policy, audit policy, or endpoint restrictions domain-wide - and GPO itself is the exact mechanism Crimson Tide used to deploy ransomware to all 280 endpoints in Phase 6.",
+      "recommended_remediation": "Deploy MedDefense hardening GPOs (Tasks 4, 5 and beyond) and link them at the domain root or targeted OUs.",
+      "mapped_task": "4-password_policy.ps1, 5-audit_policy.ps1"
+    }
+  ],
+  "summary": {
+    "total": 9,
+    "critical": 3,
+    "high": 4,
+    "medium": 2
+  }
+}

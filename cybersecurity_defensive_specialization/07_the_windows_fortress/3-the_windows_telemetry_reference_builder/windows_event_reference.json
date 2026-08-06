@@ -1,0 +1,216 @@
+{
+  "generated": "2026-08-05T09:30:07Z",
+  "logs": {
+    "security": [
+      {
+        "event_id": 4624,
+        "event_name": "An account was successfully logged on",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "Logon subcategory (Success) - Advanced Audit Policy",
+        "security_meaning": "Baseline authentication record: who logged on, from where, using which logon type.",
+        "normal_frequency": "Very high (every interactive/network logon)",
+        "triage_priority": "Low baseline / High for Logon Type 3 or 10 from an unexpected source",
+        "crimson_tide_phase": "Phase 3 - Lateral Movement (RDP/SMB logons using harvested credentials)",
+        "example_suspicious_pattern": "Logon Type 10 (RDP) to a server from a service account that has never logged on interactively before",
+        "validation_method": "Get-WinEvent -FilterHashtable @{LogName='Security';Id=4624}; inspect LogonType and IpAddress"
+      },
+      {
+        "event_id": 4625,
+        "event_name": "An account failed to log on",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "Logon subcategory (Failure) - Advanced Audit Policy",
+        "security_meaning": "Authentication failure record - the primary brute-force / password-spray signal.",
+        "normal_frequency": "Medium (occasional user typos)",
+        "triage_priority": "High when volume spikes or many distinct accounts fail from one source",
+        "crimson_tide_phase": "Phase 3 - credential stuffing/brute force preceding successful lateral movement",
+        "example_suspicious_pattern": "10+ failed logons for different target accounts from one source IP within 5 minutes",
+        "validation_method": "Get-WinEvent Id 4625; group by TargetUserName and IpAddress, count per window"
+      },
+      {
+        "event_id": 4648,
+        "event_name": "A logon was attempted using explicit credentials",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "Logon subcategory (Success) - Advanced Audit Policy",
+        "security_meaning": "A process used alternate, explicitly supplied credentials (runas, mapped drive, PsExec-style tooling).",
+        "normal_frequency": "Low",
+        "triage_priority": "High",
+        "crimson_tide_phase": "Phase 3 - Lateral Movement (pass-the-hash / pass-the-ticket tooling using explicit alternate creds)",
+        "example_suspicious_pattern": "A workstation account explicitly authenticating as a Domain Admin to a remote host",
+        "validation_method": "Get-WinEvent Id 4648; correlate ProcessName with TargetServerName"
+      },
+      {
+        "event_id": 4672,
+        "event_name": "Special privileges assigned to new logon",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "Special Logon subcategory (Success) - Advanced Audit Policy",
+        "security_meaning": "An account logged on with admin-equivalent privileges (SeDebugPrivilege, SeBackupPrivilege, etc.).",
+        "normal_frequency": "Low to medium (should correlate only with documented admins)",
+        "triage_priority": "High",
+        "crimson_tide_phase": "Phase 3/6 - flags the exact privileged-logon moment before lateral movement and the GPO ransomware push",
+        "example_suspicious_pattern": "4672 for an account not on the Task 0 Domain Admins export, or on a workstation that never hosts admin logons",
+        "validation_method": "Get-WinEvent Id 4672; cross-reference SubjectUserName against domain_baseline.json domainAdmins"
+      },
+      {
+        "event_id": 4688,
+        "event_name": "A new process has been created",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "Process Creation subcategory (Success) + command-line auditing registry key (Task 5)",
+        "security_meaning": "Full process execution telemetry, including parent process and (with Task 5's registry key) command line.",
+        "normal_frequency": "Very high",
+        "triage_priority": "Medium baseline / High for suspicious binaries or command lines",
+        "crimson_tide_phase": "Phase 3/6 - core telemetry for Mimikatz, PsExec, encoded PowerShell and ransomware binaries",
+        "example_suspicious_pattern": "powershell.exe -enc spawned by winword.exe, or a GPO-deployed scheduled task launching an unsigned binary",
+        "validation_method": "Get-WinEvent Id 4688; inspect NewProcessName, CommandLine and ParentProcessName"
+      },
+      {
+        "event_id": 4720,
+        "event_name": "A user account was created",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "User Account Management subcategory (Success) - Advanced Audit Policy",
+        "security_meaning": "New AD account provisioned - legitimate onboarding or attacker-created persistence.",
+        "normal_frequency": "Low",
+        "triage_priority": "High outside a documented change window",
+        "crimson_tide_phase": "Post-Phase 6 persistence - backup accounts created after the attacker gains Domain Admin",
+        "example_suspicious_pattern": "4720 with no matching HR onboarding ticket, followed immediately by a 4732 into a privileged group",
+        "validation_method": "Get-WinEvent Id 4720; correlate SamAccountName against onboarding records"
+      },
+      {
+        "event_id": 4726,
+        "event_name": "A user account was deleted",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "User Account Management subcategory (Success) - Advanced Audit Policy",
+        "security_meaning": "Account removal - routine offboarding or attacker anti-forensic cleanup.",
+        "normal_frequency": "Low",
+        "triage_priority": "Medium baseline / High if paired with a recent 4720 for the same account",
+        "crimson_tide_phase": "Phase 7 - Extortion/cleanup (removing accounts used during the intrusion)",
+        "example_suspicious_pattern": "4720 and 4726 for the same account name within a 24-hour window",
+        "validation_method": "Get-WinEvent Id 4720 and 4726; correlate SamAccountName and time delta"
+      },
+      {
+        "event_id": 4732,
+        "event_name": "A member was added to a security-enabled local group",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "Security Group Management subcategory (Success) - Advanced Audit Policy",
+        "security_meaning": "Group membership change - the step immediately after credential theft succeeds in a privilege-escalation chain.",
+        "normal_frequency": "Low",
+        "triage_priority": "Critical when the target group is Domain Admins, Enterprise Admins or G_IT_Admins",
+        "crimson_tide_phase": "Phase 3 - privilege escalation following Kerberoasting/credential theft",
+        "example_suspicious_pattern": "Any addition to Domain Admins/Enterprise Admins/G_IT_Admins with no matching change ticket",
+        "validation_method": "Get-WinEvent Id 4732; filter TargetUserName in {Domain Admins, Enterprise Admins, G_IT_Admins}"
+      },
+      {
+        "event_id": 1102,
+        "event_name": "The audit log was cleared",
+        "log_source": "Security",
+        "audit_or_sensor_dependency": "None - always logged by the Security log itself, independent of audit policy",
+        "security_meaning": "The Security event log was cleared - an anti-forensic action, not a configuration option.",
+        "normal_frequency": "Extremely rare (zero in normal operations)",
+        "triage_priority": "Critical - always",
+        "crimson_tide_phase": "Phase 7 - Extortion/cleanup (erasing evidence before or after ransomware detonation)",
+        "example_suspicious_pattern": "Any occurrence at all, especially outside a documented maintenance window",
+        "validation_method": "Get-WinEvent Id 1102; alert unconditionally, zero acceptable baseline"
+      }
+    ],
+    "powershell": [
+      {
+        "event_id": 4103,
+        "event_name": "Module Logging",
+        "log_source": "Windows PowerShell / Microsoft-Windows-PowerShell/Operational",
+        "audit_or_sensor_dependency": "PowerShell Module Logging (GPO)",
+        "security_meaning": "Records pipeline execution details and the parameters passed to cmdlets.",
+        "normal_frequency": "High once enabled",
+        "triage_priority": "Medium baseline",
+        "crimson_tide_phase": "Phase 3/6 - reveals AD/GPO cmdlets (New-GPO, Set-ADAccountControl) run via living-off-the-land PowerShell",
+        "example_suspicious_pattern": "Get-ADUser -Filter * piped to an export, or New-GPO invoked outside a documented change ticket",
+        "validation_method": "Get-WinEvent -LogName 'Windows PowerShell' -FilterXPath for Id 4103"
+      },
+      {
+        "event_id": 4104,
+        "event_name": "Script Block Logging",
+        "log_source": "Microsoft-Windows-PowerShell/Operational",
+        "audit_or_sensor_dependency": "PowerShell Script Block Logging (GPO, pending assignment)",
+        "security_meaning": "Full de-obfuscated script block text, including scripts assembled dynamically at runtime.",
+        "normal_frequency": "High once enabled",
+        "triage_priority": "High - the primary anti-obfuscation control",
+        "crimson_tide_phase": "Phase 3/6 - defeats Base64/obfuscated PowerShell droppers used to stage the GPO ransomware payload",
+        "example_suspicious_pattern": "Script blocks containing DownloadString, -enc, IEX, or direct New-GPO/Set-GPRegistryValue calls outside a change ticket",
+        "validation_method": "Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' Id 4104; inspect ScriptBlockText"
+      }
+    ],
+    "sysmon": [
+      {
+        "event_id": 1,
+        "event_name": "Process creation",
+        "log_source": "Microsoft-Windows-Sysmon/Operational",
+        "audit_or_sensor_dependency": "Sysmon service + process_creation rule group",
+        "security_meaning": "Richer process telemetry than 4688: file hash, digital signature status, original filename.",
+        "normal_frequency": "Very high",
+        "triage_priority": "Medium baseline / High on hash or signature mismatch",
+        "crimson_tide_phase": "Phase 3/6 - detects unsigned or renamed tooling (renamed PsExec, Mimikatz, GPO-dropped ransomware binary)",
+        "example_suspicious_pattern": "Unsigned binary named svchost.exe running from a path outside System32",
+        "validation_method": "Get-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' Id 1; check Hashes and Signed fields"
+      },
+      {
+        "event_id": 3,
+        "event_name": "Network connection",
+        "log_source": "Microsoft-Windows-Sysmon/Operational",
+        "audit_or_sensor_dependency": "Sysmon service + network_connection rule group",
+        "security_meaning": "Process-level outbound/inbound connection telemetry.",
+        "normal_frequency": "High",
+        "triage_priority": "Medium baseline / High for unusual destinations",
+        "crimson_tide_phase": "Phase 4 - Data Exfiltration (Rclone/cloud-storage uploads); Phase 3 SMB/WMI lateral connections",
+        "example_suspicious_pattern": "rclone.exe or powershell.exe making sustained outbound connections to an unrecognized cloud-storage IP range",
+        "validation_method": "Get-WinEvent Id 3; filter DestinationIp/DestinationPort against the approved egress list"
+      },
+      {
+        "event_id": 7,
+        "event_name": "Image loaded",
+        "log_source": "Microsoft-Windows-Sysmon/Operational",
+        "audit_or_sensor_dependency": "Sysmon service + image_load rule group (high volume, selectively enabled)",
+        "security_meaning": "DLL/module load events - detects DLL side-loading and reflective injection loaders.",
+        "normal_frequency": "Very high if broadly enabled (usually scoped to sensitive processes)",
+        "triage_priority": "High for unsigned DLLs loaded into lsass.exe or other trusted processes",
+        "crimson_tide_phase": "Phase 3 - credential-theft tooling (Mimikatz-style DLL injection into lsass.exe)",
+        "example_suspicious_pattern": "Unsigned DLL loaded into lsass.exe",
+        "validation_method": "Get-WinEvent Id 7; filter ImageLoaded targeting lsass.exe with Signed=false"
+      },
+      {
+        "event_id": 11,
+        "event_name": "File create",
+        "log_source": "Microsoft-Windows-Sysmon/Operational",
+        "audit_or_sensor_dependency": "Sysmon service + file_create rule group",
+        "security_meaning": "File drop telemetry - detects ransomware note drops and staged exfiltration archives.",
+        "normal_frequency": "High",
+        "triage_priority": "High for known ransomware extensions or mass creation bursts",
+        "crimson_tide_phase": "Phase 6 - Ransomware Deployment (mass creation of encrypted files and ransom notes)",
+        "example_suspicious_pattern": "Thousands of files with a new extension created across multiple directories in under 60 seconds",
+        "validation_method": "Get-WinEvent Id 11; aggregate file-creation rate per process per minute"
+      },
+      {
+        "event_id": 13,
+        "event_name": "Registry value set",
+        "log_source": "Microsoft-Windows-Sysmon/Operational",
+        "audit_or_sensor_dependency": "Sysmon service + registry rule group",
+        "security_meaning": "Registry modification telemetry - the primary signal for Run-key and service-based persistence.",
+        "normal_frequency": "Medium",
+        "triage_priority": "High for Run/RunOnce key changes by non-installer processes",
+        "crimson_tide_phase": "Post-Phase 6 persistence - Run-key or service creation to survive reboot after ransomware deployment",
+        "example_suspicious_pattern": "New value under HKLM...\\Run pointing to a binary in %TEMP% or %APPDATA%",
+        "validation_method": "Get-WinEvent Id 13; filter TargetObject for Run/RunOnce/Services keys"
+      },
+      {
+        "event_id": 22,
+        "event_name": "DNS query",
+        "log_source": "Microsoft-Windows-Sysmon/Operational",
+        "audit_or_sensor_dependency": "Sysmon service + dns_query rule group (Sysmon 11+)",
+        "security_meaning": "Process-level DNS resolution telemetry - detects C2 beaconing and DGA domain lookups.",
+        "normal_frequency": "Very high",
+        "triage_priority": "Medium baseline / High for newly-registered or DGA-pattern domains",
+        "crimson_tide_phase": "Phase 1/3 - C2 beaconing following initial access and during lateral movement",
+        "example_suspicious_pattern": "svchost.exe or an Office process resolving a newly-registered, high-entropy domain name",
+        "validation_method": "Get-WinEvent Id 22; cross-reference QueryName against a domain-reputation threat intel feed"
+      }
+    ]
+  },
+  "totalEventsDocumented": 17
+}

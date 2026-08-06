@@ -1,0 +1,46 @@
+<AppLockerPolicy Version="1">
+  <RuleCollection Type="Exe" EnforcementMode="AuditOnly">
+    <FilePathRule Id="2af2c13d-6efc-4cb1-9d3a-9a977e96cf90" Name="MedDefense - Allow Windows directory" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="c8ed6006-b244-4a7d-99cc-6464e33d7497" Name="MedDefense - Allow Program Files" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="71b77800-1461-4099-9ada-95cf4323f107" Name="MedDefense - Allow Program Files (x86)" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="C:\Program Files (x86)\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="bf1406a8-1b28-4234-8228-6314a2f1fe7b" Name="MedDefense - Allow DicomViewer (MedImage Corp)" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="C:\Program Files\MedImage\DicomViewer.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="a239343d-93fd-4265-a0fd-72a712dcbb5f" Name="MedDefense - Deny all other locations" Description="" UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*" />
+      </Conditions>
+    </FilePathRule>
+  </RuleCollection>
+  <RuleCollection Type="Script" EnforcementMode="AuditOnly">
+    <FilePathRule Id="270728e7-93b8-4855-940c-c55cc0186c93" Name="MedDefense - Allow system scripts" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="584952f5-ae6e-4c2c-8052-da5b6140d68c" Name="MedDefense - Allow admin scripts" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="C:\MedDefense_Lab\Scripts\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="088ebe57-5744-4028-80bd-e46ec0b7a5c5" Name="MedDefense - Deny all other script locations" Description="" UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*" />
+      </Conditions>
+    </FilePathRule>
+  </RuleCollection>
+</AppLockerPolicy>

@@ -1,0 +1,307 @@
+{
+  "generated": "2026-08-05T09:15:22Z",
+  "domain": {
+    "name": "meddefense.local",
+    "forestLevel": "Windows2016Forest",
+    "domainControllers": [
+      "DC01.meddefense.local"
+    ]
+  },
+  "userAccounts": [
+    {
+      "Name": "Administrator",
+      "SamAccountName": "Administrator",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-05T06:02:11Z",
+      "PasswordLastSet": "2025-11-02T00:00:00Z",
+      "PasswordNeverExpires": true,
+      "DistinguishedName": "CN=Administrator,CN=Users,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "analyst",
+      "SamAccountName": "analyst",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-05T07:41:03Z",
+      "PasswordLastSet": "2026-06-14T00:00:00Z",
+      "PasswordNeverExpires": false,
+      "DistinguishedName": "CN=analyst,CN=Users,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "James Chen",
+      "SamAccountName": "j.chen",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-04T18:22:47Z",
+      "PasswordLastSet": "2025-09-30T00:00:00Z",
+      "PasswordNeverExpires": true,
+      "DistinguishedName": "CN=James Chen,OU=IT,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Sarah Park",
+      "SamAccountName": "s.park",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-05T08:05:12Z",
+      "PasswordLastSet": "2025-10-11T00:00:00Z",
+      "PasswordNeverExpires": true,
+      "DistinguishedName": "CN=Sarah Park,OU=IT,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Marcus Webb",
+      "SamAccountName": "m.webb",
+      "Enabled": false,
+      "LastLogonDate": "2025-03-18T09:14:00Z",
+      "PasswordLastSet": "2024-12-01T00:00:00Z",
+      "PasswordNeverExpires": true,
+      "DistinguishedName": "CN=Marcus Webb,OU=IT,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Rosa Diaz",
+      "SamAccountName": "r.diaz",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-04T14:02:55Z",
+      "PasswordLastSet": "2025-08-19T00:00:00Z",
+      "PasswordNeverExpires": true,
+      "DistinguishedName": "CN=Rosa Diaz,OU=Clinical,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Linh Nguyen",
+      "SamAccountName": "l.nguyen",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-05T07:12:30Z",
+      "PasswordLastSet": "2026-05-02T00:00:00Z",
+      "PasswordNeverExpires": false,
+      "DistinguishedName": "CN=Linh Nguyen,OU=Clinical,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Kavya Patel",
+      "SamAccountName": "k.patel",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-04T22:47:19Z",
+      "PasswordLastSet": "2026-04-18T00:00:00Z",
+      "PasswordNeverExpires": false,
+      "DistinguishedName": "CN=Kavya Patel,OU=Clinical,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Ama Osei",
+      "SamAccountName": "a.osei",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-05T06:55:41Z",
+      "PasswordLastSet": "2026-06-30T00:00:00Z",
+      "PasswordNeverExpires": false,
+      "DistinguishedName": "CN=Ama Osei,OU=Clinical,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Tyrell Brooks",
+      "SamAccountName": "t.brooks",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-03T19:31:02Z",
+      "PasswordLastSet": "2026-01-22T00:00:00Z",
+      "PasswordNeverExpires": false,
+      "DistinguishedName": "CN=Tyrell Brooks,OU=Clinical,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Diego Romero",
+      "SamAccountName": "d.romero",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-05T09:10:00Z",
+      "PasswordLastSet": "2025-07-07T00:00:00Z",
+      "PasswordNeverExpires": true,
+      "DistinguishedName": "CN=Diego Romero,OU=Billing,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Farah Hassan",
+      "SamAccountName": "f.hassan",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-04T16:44:12Z",
+      "PasswordLastSet": "2026-03-11T00:00:00Z",
+      "PasswordNeverExpires": false,
+      "DistinguishedName": "CN=Farah Hassan,OU=Billing,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Chidi Oduya",
+      "SamAccountName": "c.oduya",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-05T08:29:37Z",
+      "PasswordLastSet": "2026-02-25T00:00:00Z",
+      "PasswordNeverExpires": false,
+      "DistinguishedName": "CN=Chidi Oduya,OU=Billing,DC=meddefense,DC=local"
+    },
+    {
+      "Name": "Nina Kowalski",
+      "SamAccountName": "n.kowalski",
+      "Enabled": true,
+      "LastLogonDate": "2026-08-04T20:03:48Z",
+      "PasswordLastSet": "2026-05-29T00:00:00Z",
+      "PasswordNeverExpires": false,
+      "DistinguishedName": "CN=Nina Kowalski,OU=Billing,DC=meddefense,DC=local"
+    }
+  ],
+  "groups": [
+    {
+      "name": "Domain Admins",
+      "sid": "S-1-5-21-1234567890-987654321-111111111-512",
+      "members": [
+        "Administrator",
+        "analyst"
+      ]
+    },
+    {
+      "name": "Enterprise Admins",
+      "sid": "S-1-5-21-1234567890-987654321-111111111-519",
+      "members": [
+        "Administrator"
+      ]
+    },
+    {
+      "name": "G_IT_Admins",
+      "sid": "S-1-5-21-1234567890-987654321-111111111-1105",
+      "members": [
+        "James Chen",
+        "Sarah Park",
+        "Marcus Webb"
+      ]
+    },
+    {
+      "name": "G_Clinical_Staff",
+      "sid": "S-1-5-21-1234567890-987654321-111111111-1106",
+      "members": [
+        "Rosa Diaz",
+        "Linh Nguyen",
+        "Kavya Patel",
+        "Ama Osei",
+        "Tyrell Brooks"
+      ]
+    },
+    {
+      "name": "G_Billing_Staff",
+      "sid": "S-1-5-21-1234567890-987654321-111111111-1107",
+      "members": [
+        "Diego Romero",
+        "Farah Hassan",
+        "Chidi Oduya",
+        "Nina Kowalski"
+      ]
+    },
+    {
+      "name": "G_Service_Accounts",
+      "sid": "S-1-5-21-1234567890-987654321-111111111-1108",
+      "members": [
+        "svc-backup",
+        "svc-sql",
+        "svc-web"
+      ]
+    },
+    {
+      "name": "Domain Users",
+      "sid": "S-1-5-21-1234567890-987654321-111111111-513",
+      "members": []
+    }
+  ],
+  "serviceAccounts": [
+    {
+      "Name": "svc-backup",
+      "SamAccountName": "svc-backup",
+      "DistinguishedName": "CN=svc-backup,OU=Service Accounts,DC=meddefense,DC=local",
+      "TrustedForDelegation": true,
+      "PasswordLastSet": "2024-02-14T00:00:00Z",
+      "HasSPN": true
+    },
+    {
+      "Name": "svc-sql",
+      "SamAccountName": "svc-sql",
+      "DistinguishedName": "CN=svc-sql,OU=Service Accounts,DC=meddefense,DC=local",
+      "TrustedForDelegation": true,
+      "PasswordLastSet": "2023-11-30T00:00:00Z",
+      "HasSPN": true
+    },
+    {
+      "Name": "svc-web",
+      "SamAccountName": "svc-web",
+      "DistinguishedName": "CN=svc-web,OU=Service Accounts,DC=meddefense,DC=local",
+      "TrustedForDelegation": true,
+      "PasswordLastSet": "2024-05-06T00:00:00Z",
+      "HasSPN": true
+    }
+  ],
+  "unconstrainedDelegationCount": 3,
+  "gpos": [
+    {
+      "DisplayName": "Default Domain Policy",
+      "Id": "31b2f340-016d-11d2-945f-00c04fb984f9",
+      "CreationTime": "2025-01-15T10:00:00Z",
+      "ModificationTime": "2025-01-15T10:00:00Z"
+    },
+    {
+      "DisplayName": "Default Domain Controllers Policy",
+      "Id": "6ac1786c-016f-11d2-945f-00c04fb984f9",
+      "CreationTime": "2025-01-15T10:00:00Z",
+      "ModificationTime": "2025-01-15T10:00:00Z"
+    }
+  ],
+  "passwordPolicy": {
+    "minLength": 7,
+    "complexity": false,
+    "history": 0,
+    "maxAgeDays": 0
+  },
+  "lockoutPolicy": {
+    "threshold": 0,
+    "status": "NOT CONFIGURED"
+  },
+  "kerberosEncryptionTypes": [
+    "DES",
+    "RC4",
+    "AES128",
+    "AES256"
+  ],
+  "domainAdmins": [
+    "Administrator",
+    "analyst"
+  ],
+  "enterpriseAdmins": [
+    "Administrator"
+  ],
+  "findings": [
+    {
+      "severity": "Critical",
+      "finding": "Password policy minimum length is 7 (target: 14)"
+    },
+    {
+      "severity": "Critical",
+      "finding": "Account lockout policy is not configured (threshold: 0)"
+    },
+    {
+      "severity": "Critical",
+      "finding": "Weak Kerberos encryption types accepted: DES, RC4"
+    },
+    {
+      "severity": "High",
+      "finding": "6 accounts have PasswordNeverExpires set"
+    },
+    {
+      "severity": "High",
+      "finding": "3 service accounts trusted for unconstrained delegation"
+    },
+    {
+      "severity": "High",
+      "finding": "No MedDefense hardening GPOs present (2 default GPO(s) only)"
+    },
+    {
+      "severity": "High",
+      "finding": "Built-in Administrator account is an active member of Domain Admins"
+    },
+    {
+      "severity": "Medium",
+      "finding": "Maximum password age is 0 (passwords never expire domain-wide)"
+    },
+    {
+      "severity": "Medium",
+      "finding": "SMBv1 protocol is enabled on DC01"
+    }
+  ],
+  "findingsSummary": {
+    "total": 9,
+    "critical": 3,
+    "high": 4,
+    "medium": 2
+  }
+}
