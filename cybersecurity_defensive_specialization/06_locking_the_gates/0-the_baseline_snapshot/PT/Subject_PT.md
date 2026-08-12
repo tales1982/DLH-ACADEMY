@@ -8,10 +8,12 @@ Você não consegue provar que o hardening funcionou se não sabe de onde partiu
 
 ## Instruções
 
-Escreva um script `0-baseline_snapshot.sh` que capture a linha de base completa de segurança de um sistema Linux. O script precisa:
+Escreva um script 
+
+ que capture a linha de base completa de segurança de um sistema Linux. O script precisa:
 
 - Registrar identificação do sistema (hostname, SO, versão do kernel, uptime)
-- Listar todos os serviços em execução e seu estado
+- #
 - Listar todas as portas abertas e sockets em escuta
 - Listar todos os binários SUID e SGID
 - Listar todos os arquivos com permissão de escrita para qualquer usuário (excluindo `/proc`, `/sys`, `/dev`)
